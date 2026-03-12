@@ -13,6 +13,10 @@ logging, and string manipulation functions.
 #include <stddef.h>
 #include <stdio.h>
 
+//
+// ---------------- Data ----------------
+//
+
 /// Stores a string object (data, length, capacity).
 typedef struct String {
     char* data;
@@ -20,35 +24,52 @@ typedef struct String {
     size_t capacity;
 } String;
 
+//
+// ---------------- Memory Functions ----------------
+//
+
 /// Allocate a string from a character array.
 String stringCreate(const char* value);
 /// Free a string (double free protection).
-String stringFree(String string);
+void stringFree(String* string);
 /// Reallocate a string to it's length, discarding the buffer.
-String stringPurge(String string);
+void stringPurge(String* string);
 /// Deeply copy another string.
-String stringCopy(String other);
+String stringCopy(String* other);
+
+//
+// ---------------- IO Functions ----------------
+//
 
 /// Log a string to the specified stream.
-void fStringLog(String string, FILE* stream);
+void fStringLog(const String* string, FILE* stream);
 /// Print a string to the specified stream.
-void fStringPrint(String string, FILE* stream);
+void fStringPrint(const String* string, FILE* stream);
 /// Log a string to the standard output stream.
-void stringLog(String string);
+void stringLog(const String* string);
 /// Print a string to the standard output stream.
-void stringPrint(String string);
+void stringPrint(const String* string);
+
+//
+// ---------------- Manipulation Functions ----------------
+//
 
 /// Append another string to the destination.
-String stringAppend(String dest, String other);
+void stringAppend(String* dest, String* other);
 /// Multiply a string by a scaler.
-String stringMultiply(String string, int scaler);
+void stringMultiply(String* string, int scaler);
 /// Create a new string from a slice of another string.
-String stringSubstring(String string, size_t a, size_t b);
-/** 
- * Compares two strings lexicographically.
- * @return 0 if both strings are identical, 
- * 1 if A is greater than B, -1 if A is less than B.
-*/
+String stringSubstring(String* string, size_t start, size_t end);
+/// Strips a string of all leading and trailing whitespace.
+void stringStrip(String* string);
+
+//
+// ---------------- Searching/Analysing Functions ----------------
+//
+
+/// Finds the first occurance of string other in the string.
+size_t stringIndexOf(String string, String other);
+/// Compares two strings lexicographically.
 int stringCompare(String a, String b);
 /// Checks if the end of a string is a particular suffix.
 int stringEndsWith(String string, String suffix);

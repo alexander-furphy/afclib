@@ -22,7 +22,7 @@ endif
 
 # --- Variables ---
 CC = gcc
-CFLAGS = -Wall -Wextra -g -Iinclude
+CFLAGS = -Wall -Wextra -g -Iinclude -fsanitize=address -g
 SRC_DIR = src
 OBJ_DIR = build
 DIST_DIR = dist
