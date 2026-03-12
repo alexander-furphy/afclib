@@ -72,7 +72,7 @@ void stringReserve(String* string, size_t size) {
     void* temp = realloc(string->data, newLength);
     if(temp == NULL) {
         fprintf(stderr, STR_ALLOC_FAIL_MSG " %zu.\n", newLength);
-        stringFree(&string);
+        stringFree(string);
         *string = STR_NULL;
     }
     else {
@@ -144,7 +144,7 @@ void stringSetFormat(String* string, const char* format, ...) {
         return;
     }
 
-    if(string->capacity < length + 1) {
+    if(string->capacity < (size_t)(length + 1)) {
         stringReserve(string, length + 1);
     }
 
