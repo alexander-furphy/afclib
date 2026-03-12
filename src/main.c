@@ -49,14 +49,43 @@ void manipTest(void) {
     stringLog(&b);
     stringLog(&a);
 
-    stringMultiply(&a, 3);
+    stringScale(&a, 3);
     stringLog(&a);
 
     String sub = stringSubstring(&a, 10, 14);
     stringLog(&sub);
 }
 
+void searchingTest(void) {
+    String a = stringCreate("Hello, World!");
+    String b = stringCreate("World!");
+    printf("'World!' first occurance: index %zu.\n", stringIndexOf(&a, &b));
+    printf("Comparision of strings: %d.\n", stringCompare(&a, &b));
+    printf("String ends with 'World'? %d.\n", stringEndsWith(&a, &b));
+}
+
+void stringBufferTest(void) {
+    String string = stringCreateEmpty();
+    stringLog(&string);
+    stringSet(&string, "Hello, World!");
+    stringLog(&string);
+    stringSet(&string, "This is a very long string that will require resizing.");
+    stringLog(&string);
+    stringReserve(&string, 100);
+    stringClear(&string);
+    stringLog(&string);
+    stringSet(&string, "Small string ");
+    stringLog(&string);
+    stringScale(&string, 7);
+    stringLog(&string);
+    char* data = stringGetCString(&string);
+    printf("%s", data);
+}
+
 int main(void) {
-    manipTest();
+    String string = stringCreateEmpty();
+    stringSetFormat(&string, "Number: %d, Decimal: %f, String: %s\n", 5, 2.324, "Hello");
+    stringPrint(&string);
+
     return 0;
 }
