@@ -74,7 +74,7 @@ void searchingTest(void) {
 }
 
 void stringBufferTest(void) {
-    String string = stringCreateEmpty();
+    String string = STR_NULL;
     stringLog(&string);
     stringSet(&string, "Hello, World!");
     stringLog(&string);
@@ -140,7 +140,7 @@ void comparisionTest(void) {
     String b = stringCreate("Hello");
     printf("Starts with: %d\n", stringStartsWith(&a, &b));
     stringFree(&b);
-    b = stringCreateEmpty();
+    b = STR_NULL;
     printf("Starts with: %d\n", stringStartsWith(&a, &b));
     stringFree(&b);
     b = stringCreate("ello");
@@ -207,8 +207,17 @@ int main(void) {
     searchingTest();
     stringBufferTest();
     extraProcessingTest();
-    extraProcessingTest();
     comparisionTest();
     stringArrayTest();
     return 0;
 }
+
+//
+//
+//
+// TODO: Write documentation for, validate, and optimise
+// the searching and inspection, transformation and cleaning, and high
+// level processing categories.
+//
+//
+//

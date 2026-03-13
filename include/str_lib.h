@@ -17,7 +17,11 @@ logging, and string manipulation functions.
 // ---------------- Constants ----------------
 //
 
-#define STR_EMPTY_SIZE 16
+#define STR_NULL ((String){.data = NULL, .length = 0, .capacity = 0})
+#define STR_INVALID(s) (s.data == NULL)
+#define STR_ARRAY_NULL ((StringArray){.data = NULL, .length = 0})
+#define STR_ARRAY_INVALID (s.data == NULL)
+#define STR_STD_PRINT (stdout)
 
 //
 // ---------------- Data ----------------
@@ -41,9 +45,13 @@ typedef struct StringArray {
 //
 
 /// Allocate a new string array with a specified number of elements.
+/// All elements are initialised to 0.
 StringArray stringArrayCreate(size_t length);
+
 /// Free a string array.
+/// Doesn't free the strings inside the array.
 void stringArrayFree(StringArray* array);
+
 /// Free a string array and every string within it.
 void stringArrayFreeDeep(StringArray* array);
 
@@ -52,36 +60,53 @@ void stringArrayFreeDeep(StringArray* array);
 //
 
 /// Allocate a string from a character array.
+/// Will not allocate values 0 bytes in length.
 String stringCreate(const char* value);
-/// Create an empty string with a buffer size equal to STR_EMPTY_SIZE.
-String stringCreateEmpty(void);
+
 /// Create a string at a specified starting size.
+/// Will not allocate a size of 0.
 String stringCreateSize(size_t size);
-/// Free a string (double free protection).
+
+/// Free a string, with null protection.
 void stringFree(String* string);
-/// Deeply copy another string.
+
+/// Deep copy another string into a new string.
 String stringCopy(String* other);
-/// Reallocate the buffer of the string to size bytes if it is below size bytes.
+
+/// Reallocate the string to specified if it is below the specified size.
+/// If the reallocation fails, the original string will be freed and set to null.
 void stringReserve(String* string, size_t size);
-/// Clear the string, but retain buffer.
+
+/// Clear the string, without freeing the buffer.
+/// Identical to writing string.length = 0.
 void stringClear(String* string);
+
 /// Reallocate a string to it's length, discarding the buffer.
+/// If the reallocation fails, the original string will be freed and set to null.
 void stringShrinkBuffer(String* string);
 
 //
 // ---------------- Formatting and IO ----------------
 //
 
-/// Log a string to the specified stream.
+/// Log a string to the specified stream in the following format:
+/// [mem = 0x9F28, length = 5, capacity = 17, value = 'Hello']"
 void fStringLog(const String* string, FILE* stream);
+
 /// Print a string to the specified stream.
 void fStringPrint(const String* string, FILE* stream);
-/// Log a string to the standard output stream.
+
+/// Log a string to the standard output stream in the following format:
+/// [mem = 0x9F28, length = 5, capacity = 17, value = 'Hello']"
 void stringLog(const String* string);
+
 /// Print a string to the standard output stream.
 void stringPrint(const String* string);
+
 /// Pass formatted output to a string.
+/// Direct binding to the standard C formatting.
 void stringSetFormat(String* string, const char* format, ...);
+
 /// Retrieve a heap allocated character array with a null terminator.
 char* stringGetCString(String* string);
 
@@ -89,18 +114,28 @@ char* stringGetCString(String* string);
 // ---------------- Basic Modification ----------------
 //
 
-/// Set an existing string to a character array, reusing the buffer.
+/// Set an existing string to a character array.
+/// Only resizes the buffer if the character array exceeds the size of the buffer.
 void stringSet(String* string, const char* value);
+
 /// Append another string to the destination.
 void stringAppend(String* dest, String* other);
+
 /// Append a C string to the destination.
 void stringAppendCStr(String* dest, const char* value);
-/// Insert toInsert into the string, at the specified index.
+
+/// Insert another string into the string at the specified index.
+/// Will not execute if index is greater than the length of the string.
 void stringInsert(String* string, String* toInsert, size_t index);
+
 /// Delete a slice of a string, from a specified index range.
+/// Will not execute with out of bounds indices.
+/// Start cannot be greater than end.
 void stringDelete(String* string, size_t start, size_t end);
+
 /// Replace each instance of old with new in the string.
 void stringReplace(String* string, String* old, String* new);
+
 /// Repeat a string by a scaler.
 void stringScale(String* string, int scaler);
 

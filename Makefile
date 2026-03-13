@@ -55,7 +55,7 @@ run: $(TARGET)
 
 # Run with leaks
 debug: $(TARGET)
-	@leaks --atExit -- ./$(TARGET)
+	@leaks -quiet -atExit -- ./$(TARGET)
 
 # The Linking Rule
 $(TARGET): $(OBJS)

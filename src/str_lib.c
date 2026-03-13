@@ -5,21 +5,19 @@
 #include <stdarg.h>
 
 #define STR_ALLOC_FAIL_MSG "Failed to allocate string of length"
-#define STR_NULL (String){0}
-#define STR_ARRAY_NULL (StringArray){0}
 #define STR_IS_NULL(s) (s == NULL || s->data == NULL)
-#define STR_PRINT_STREAM stdout
-#define NOT_FOUND ((size_t)-1)
+#define STR_ARRAY_IS_NULL(a) (a == NULL || a->data == NULL)
+#define STR_NOT_FOUND ((size_t)-1)
 
 //
 // ---------------- String Array Functions ----------------
 //
 
 StringArray stringArrayCreate(size_t length) {
+    // Initialise to zero to avoid user trying to use garbage values
     String* data = calloc(length, sizeof(String));
 
     if(data == NULL) {
-        fprintf(stderr, "Failed to allocate string array of length %zu.\n", length);
         return STR_ARRAY_NULL;
     }
 
@@ -27,15 +25,21 @@ StringArray stringArrayCreate(size_t length) {
 }
 
 void stringArrayFree(StringArray* array) {
-    if(array == NULL || array->data == NULL) {
+    if(STR_ARRAY_IS_NULL(array)) {
         return;
     }
 
+    // Free and set to null
     free(array->data);
     *array = STR_ARRAY_NULL;
 }
 
 void stringArrayFreeDeep(StringArray* array) {
+    if(STR_ARRAY_IS_NULL(array)) {
+        return;
+    }
+
+    // Free every string within the array
     for(size_t i = 0; i < array->length; i++) {
         stringFree(&(array->data[i]));
     }
@@ -48,70 +52,90 @@ void stringArrayFreeDeep(StringArray* array) {
 //
 
 String stringCreate(const char* value) {
+    if(value == NULL) {
+        return STR_NULL;
+    }
+
     // strlen exlcudes null terminator, which is desired
     size_t length = strlen(value);
+
+    if(length == 0) {
+        return STR_NULL;
+    }
+
     String string = stringCreateSize(length);
+
+    if(STR_INVALID(string)) {
+        return STR_NULL;
+    }
+
+    // Only copy if string was created properly
     memcpy(string.data, value, length);
     string.length = length;
 
     return string;
 }
 
-String stringCreateEmpty(void) {
-    return stringCreateSize(STR_EMPTY_SIZE);
-}
-
 String stringCreateSize(size_t size) {
-    char* data = malloc(size * sizeof(char));
-    if(data == NULL) {
-        fprintf(stderr, STR_ALLOC_FAIL_MSG " %zu.\n", size);
+    if(size == 0) {
         return STR_NULL;
     }
+
+    char* data = malloc(size * sizeof(char));
+
+    if(data == NULL) {
+        return STR_NULL;
+    }
+
     return (String){data, 0, size};
 }
 
 void stringFree(String* string) {
-    if(string == NULL) return;
-
-    // Double free guard
-    if(string->data == NULL) {
-        fprintf(stderr, "Attempted free on null string.\n");
+    if(STR_IS_NULL(string)) {
         return;
     }
 
     free(string->data);
-    
     *string = STR_NULL;
 }
 
 String stringCopy(String* other) {
-    if(STR_IS_NULL(other)) return STR_NULL;
+    if(STR_IS_NULL(other)) {
+        return STR_NULL;
+    }
 
     // Allocate and validate memory
     char* data = malloc(other->length * sizeof(char));
     if(data == NULL) {
-        fprintf(stderr, STR_ALLOC_FAIL_MSG " %zu.\n", other->length);
         return STR_NULL;
     }
+
     memcpy(data, other->data, other->length);
     
     return (String){data, other->length, other->length};
 }
 
 void stringReserve(String* string, size_t size) {
-    // Don't allocate if the string buffer is already at the minimum size.
-    if(string->capacity >= size) return;
+    if(STR_IS_NULL(string)) {
+        return;
+    }
 
-    size_t newLength = size;
-    void* temp = realloc(string->data, newLength);
+    // Don't allocate if the string buffer is already at the minimum size.
+    if(string->capacity >= size) {
+        return;
+    }
+
+    // Reallocate into a new pointer
+    void* temp = realloc(string->data, size);
+
+    // If the reallocation failed, free the original
     if(temp == NULL) {
-        fprintf(stderr, STR_ALLOC_FAIL_MSG " %zu.\n", newLength);
         stringFree(string);
         *string = STR_NULL;
     }
     else {
         string->data = temp;
-        string->capacity = newLength;
+        string->capacity = size;
     }
 }
 
@@ -120,14 +144,20 @@ void stringClear(String* string) {
 }
 
 void stringShrinkBuffer(String* string) {
-    if(STR_IS_NULL(string)) return;
+    if(STR_IS_NULL(string)) {
+        return;
+    }
 
-    string->data = realloc(string->data, string->length);
-    if(string->data == NULL) {
-        fprintf(stderr, STR_ALLOC_FAIL_MSG " %zu.\n", string->length);
+    // Reallocate into a new pointer
+    void* temp = realloc(string->data, string->length);
+
+    // If the reallocation failed, free the original
+    if(temp == NULL) {
+        stringFree(string);
         *string = STR_NULL;
     }
     else {
+        string->data = temp;
         string->capacity = string->length;
     }
 }
@@ -137,7 +167,9 @@ void stringShrinkBuffer(String* string) {
 //
 
 void fStringLog(const String* string, FILE* stream) {
-    if(STR_IS_NULL(string)) return;
+    if(STR_IS_NULL(string)) {
+        return;
+    }
 
     // Print pointer, length and capacity
     fprintf(
@@ -146,42 +178,52 @@ void fStringLog(const String* string, FILE* stream) {
         string->data, string->length, string->capacity
     );
     
-    // Directly write the data
+    // Directly write the data from the string
     fwrite(string->data, sizeof(char), string->length, stream);
+
     fprintf(stream, "']\n");
 }
 
 void fStringPrint(const String* string, FILE* stream) {
-    if(STR_IS_NULL(string)) return;
+    if(STR_IS_NULL(string)) {
+        return;
+    }
+
     fwrite(string->data, sizeof(char), string->length, stream);
 }
 
 void stringLog(const String* string) {
-    fStringLog(string, STR_PRINT_STREAM);
+    fStringLog(string, STR_STD_PRINT);
 }
 
 void stringPrint(const String* string) {
-    fStringPrint(string, STR_PRINT_STREAM);
+    fStringPrint(string, STR_STD_PRINT);
 }
 
 void stringSetFormat(String* string, const char* format, ...) {
+    if(STR_IS_NULL(string)) {
+        return;
+    }
+
     va_list args, argsCopy;
     va_start(args, format);
+
+    // Take a copy for the length calculation.
     va_copy(argsCopy, args);
 
+    // Calculate the length required for the string.
     int length = vsnprintf(NULL, 0, format, argsCopy);
     va_end(argsCopy);
 
-    // Formatting error check
+    // Formatting error check.
     if(length < 0) {
         va_end(args);
         return;
     }
 
-    if(string->capacity < (size_t)(length + 1)) {
-        stringReserve(string, length + 1);
-    }
+    stringReserve(string, length + 1);
 
+    // Write the data to the string.
     vsnprintf(string->data, (size_t)length + 1, format, args);
     string->length = length;
 
@@ -189,6 +231,10 @@ void stringSetFormat(String* string, const char* format, ...) {
 }
 
 char* stringGetCString(String* string) {
+    if(STR_IS_NULL(string)) {
+        return NULL;
+    }
+
     // Add an extra byte for the null terminator
     char* data = malloc((string->length + 1) * sizeof(char));
     if(data == NULL) {
@@ -210,29 +256,43 @@ char* stringGetCString(String* string) {
 //
 
 void stringSet(String* string, const char* value) {
-    size_t length = strlen(value);
-    if(string->capacity < length) {
-        stringReserve(string, length);
+    if(STR_IS_NULL(string)) {
+        return;
     }
+
+    size_t length = strlen(value);
+    stringReserve(string, length);
+
+    // Copy the data into the string.
     memcpy(string->data, value, length);
     string->length = length;
 }
 
 void stringAppend(String* dest, String* other) {
-    size_t requiredLength = dest->length + other->length;
-    if(dest->capacity < requiredLength) {
-        stringReserve(dest, requiredLength);
+    if(STR_IS_NULL(dest) || STR_IS_NULL(other)) {
+        return;
     }
+
+    size_t requiredLength = dest->length + other->length;
+
+    // Resize if needed
+    stringReserve(dest, requiredLength);
+
+    // Copy the data to the end of the destination
     memcpy(&(dest->data[dest->length]), other->data, other->length);
     dest->length = requiredLength;
 }
 
 void stringAppendCStr(String* dest, const char* value) {
+    if(STR_IS_NULL(dest) || value == NULL) {
+        return;
+    }
+
     size_t valueLength = strlen(value);
     size_t requiredLength = dest->length + valueLength;
-    if(dest->capacity < requiredLength) {
-        stringReserve(dest, requiredLength);
-    }
+    stringReserve(dest, requiredLength);
+
+    // Copy the memory to the end of the destination
     memcpy(&(dest->data[dest->length]), value, valueLength);
     dest->length = requiredLength;
 }
@@ -242,12 +302,18 @@ void stringInsert(String* string, String* toInsert, size_t index) {
         return;
     }
 
+    // Calculate the required length
     size_t requiredLength = string->length + toInsert->length;
     stringReserve(string, requiredLength);
 
+    // Calculate the destionation and copy size
     size_t dest = index + toInsert->length;
     size_t copySize = string->length - index;
+
+    // Move the second part of the string to make room for the insertion
     memmove(&(string->data[dest]), &(string->data[index]), copySize);
+
+    // Copy the insertion into the string.
     memcpy(&(string->data[index]), toInsert->data, toInsert->length);
 
     string->length = requiredLength;
@@ -258,7 +324,10 @@ void stringDelete(String* string, size_t start, size_t end) {
         return;
     }
 
+    // Calculate the amount to shift the second half to the left
     size_t shiftAmount = string->length - end;
+
+    // Move the second part of the string to the left.
     memmove(&(string->data[start]), &(string->data[end]), shiftAmount);
     string->length -= end - start;
 }
@@ -279,7 +348,7 @@ void stringReplace(String* string, String* old, String* new) {
         size_t matchIndex = stringIndexOf(string, old, currentPos);
 
         // If not found, no strings are left to substitutes
-        if(matchIndex == NOT_FOUND) {
+        if(matchIndex == STR_NOT_FOUND) {
             break;
         }
 
@@ -288,9 +357,7 @@ void stringReplace(String* string, String* old, String* new) {
         size_t suffixLength = string->length - suffixStart;
 
         // Resize if required
-        if((string->length + lengthDiff) > string->capacity) {
-            stringReserve(string, string->length + lengthDiff);
-        }
+        stringReserve(string, string->length + lengthDiff);
 
         // Don't move if suffix is of length 0
         if(suffixLength > 0) {
@@ -314,13 +381,27 @@ void stringReplace(String* string, String* old, String* new) {
 }
 
 void stringScale(String* string, int scaler) {
+    if(STR_IS_NULL(string) || scaler <= 1) {
+        return;
+    }
+
+    size_t originalLength = string->length;
     size_t requiredLength = string->length * scaler;
-    if(string->capacity < requiredLength) {
-        stringReserve(string, requiredLength);
+
+    stringReserve(string, requiredLength);
+
+    // Repetively double the string until it no longer fits into a power of two.
+    size_t currentLength = originalLength;
+    while(currentLength * 2 <= requiredLength) {
+        memcpy(string->data + currentLength, string->data, currentLength);
+        currentLength *= 2;
     }
-    for(int i = 1; i < scaler; i++) {
-        memcpy(&(string->data[string->length * i]), string->data, string->length);
+
+    // Fill in the remaining slots
+    if(currentLength < requiredLength) {
+        memcpy(string->data + currentLength, string->data, requiredLength - currentLength);
     }
+
     string->length = requiredLength;
 }
 
@@ -359,7 +440,7 @@ int stringEquals(String* a, String* b) {
 
 size_t stringIndexOf(String* string, String* other, size_t startIndex) {
     if(other->length > string->length || other->length == 0) {
-        return NOT_FOUND;
+        return STR_NOT_FOUND;
     }
 
     for(size_t i = startIndex; i <= string->length - other->length; i++) {
@@ -369,12 +450,12 @@ size_t stringIndexOf(String* string, String* other, size_t startIndex) {
         }
     }
 
-    return NOT_FOUND;
+    return STR_NOT_FOUND;
 }
 
 size_t stringLastIndexOf(String* string, String* other, size_t startIndex) {
     if(other->length > string->length || other->length == 0) {
-        return NOT_FOUND;
+        return STR_NOT_FOUND;
     }
 
     for(size_t i = string->length - other->length - 1 - startIndex; i >= 0; i--) {
@@ -383,7 +464,7 @@ size_t stringLastIndexOf(String* string, String* other, size_t startIndex) {
         }
     }
     
-    return NOT_FOUND;
+    return STR_NOT_FOUND;
 }
 
 int stringStartsWith(String* string, String* prefix) {
@@ -415,7 +496,7 @@ int stringEndsWith(String* string, String* suffix) {
 }
 
 int stringContains(String* string, String* other) {
-    return stringIndexOf(string, other, 0) != NOT_FOUND;
+    return stringIndexOf(string, other, 0) != STR_NOT_FOUND;
 }
 
 //
@@ -531,7 +612,7 @@ StringArray stringSplit(String* string, String* delimiter) {
     while(1) {
         currentIndex = stringIndexOf(string, delimiter, currentIndex);
         
-        if(currentIndex == NOT_FOUND) {
+        if(currentIndex == STR_NOT_FOUND) {
             break;
         }
 
