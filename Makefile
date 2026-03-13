@@ -22,7 +22,7 @@ endif
 
 # --- Variables ---
 CC = gcc
-CFLAGS = -Wall -Wextra -g -Iinclude -fsanitize=address -g
+CFLAGS = -Wall -Wextra -g -Iinclude -g
 SRC_DIR = src
 OBJ_DIR = build
 DIST_DIR = dist
@@ -53,6 +53,10 @@ archive: $(LIB_OBJS)
 run: $(TARGET)
 	@./$(TARGET)
 
+# Run with leaks
+debug: $(TARGET)
+	@leaks --atExit -- ./$(TARGET)
+
 # The Linking Rule
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
@@ -71,4 +75,4 @@ else
 	@$(RM) $(OBJ_DIR) $(DIST_DIR) $(TARGET)
 endif
 
-.PHONY: all clean run archive
+.PHONY: all clean run archive debug

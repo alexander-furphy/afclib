@@ -30,6 +30,23 @@ typedef struct String {
     size_t capacity;
 } String;
 
+/// Wrapper for an array of string objects.
+typedef struct StringArray {
+    String* data;
+    size_t length;
+} StringArray;
+
+//
+// ---------------- String Array Functions ----------------
+//
+
+/// Allocate a new string array with a specified number of elements.
+StringArray stringArrayCreate(size_t length);
+/// Free a string array.
+void stringArrayFree(StringArray* array);
+/// Free a string array and every string within it.
+void stringArrayFreeDeep(StringArray* array);
+
 //
 // ---------------- Lifetime and Memory Management ----------------
 //
@@ -49,7 +66,7 @@ void stringReserve(String* string, size_t size);
 /// Clear the string, but retain buffer.
 void stringClear(String* string);
 /// Reallocate a string to it's length, discarding the buffer.
-void stringPurge(String* string);
+void stringShrinkBuffer(String* string);
 
 //
 // ---------------- Formatting and IO ----------------
@@ -76,6 +93,14 @@ char* stringGetCString(String* string);
 void stringSet(String* string, const char* value);
 /// Append another string to the destination.
 void stringAppend(String* dest, String* other);
+/// Append a C string to the destination.
+void stringAppendCStr(String* dest, const char* value);
+/// Insert toInsert into the string, at the specified index.
+void stringInsert(String* string, String* toInsert, size_t index);
+/// Delete a slice of a string, from a specified index range.
+void stringDelete(String* string, size_t start, size_t end);
+/// Replace each instance of old with new in the string.
+void stringReplace(String* string, String* old, String* new);
 /// Repeat a string by a scaler.
 void stringScale(String* string, int scaler);
 
@@ -83,14 +108,20 @@ void stringScale(String* string, int scaler);
 // ---------------- Searching and Inspection ----------------
 //
 
-/// Create a new string from a slice of another string.
-String stringSubstring(String* string, size_t start, size_t end);
-/// Finds the first occurance of string other in the string.
-size_t stringIndexOf(String* string, String* other);
 /// Compares two strings lexicographically.
 int stringCompare(String* a, String* b);
+/// Checks if two strings are identical.
+int stringEquals(String* a, String* b);
+/// Finds the first occurance of string other in the string, starting at startIndex.
+size_t stringIndexOf(String* string, String* other, size_t startIndex);
+/// Finds the last occurance of string other in the string, starting length - startIndex.
+size_t stringLastIndexOf(String* string, String* other, size_t startIndex);
+/// Checks if the start of a string is a particular prefix.
+int stringStartsWith(String* string, String* prefix);
 /// Checks if the end of a string is a particular suffix.
 int stringEndsWith(String* string, String* suffix);
+/// Check if string other is found in string.
+int stringContains(String* string, String* other);
 
 //
 // ---------------- Transformation and Cleaning ----------------
@@ -98,9 +129,28 @@ int stringEndsWith(String* string, String* suffix);
 
 /// Strips a string of all leading and trailing whitespace.
 void stringStrip(String* string);
+/// Trims the leading whitespace of a string.
+void stringTrimLeft(String* string);
+/// Trims the trailing whitespace of a string.
+void stringTrimRight(String* string);
+/// Convert all lowercase characters in the string to uppercase.
+void stringToUpper(String* string);
+/// Convert all uppercase characters in the string to lowercase.
+void stringToLower(String* string);
+/// Reverses the characters in a string.
+void stringReverse(String* string);
 
 //
+// ---------------- High Level Processing ----------------
 //
-//
+
+/// Create a new string from a slice of another string. End is exclusive.
+String stringSubstring(String* string, size_t start, size_t end);
+/// Splits a string by a deliminator and returns it as a string array.
+StringArray stringSplit(String* string, String* delimiter);
+/// Join a number of strings as arguments. Pass arguments as string pointers.
+String stringJoin(String* seperator, size_t count, ...);
+/// Join an array of strings into one.
+String stringJoinArray(String* seperator, StringArray* array);
 
 #endif

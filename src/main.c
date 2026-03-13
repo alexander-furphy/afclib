@@ -1,12 +1,11 @@
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include "str_lib.h"
-#include <stdarg.h>
 
 void lifetimeTest(void) {
     String string = stringCreate("Alexander Furphy.");
     stringLog(&string);
-    stringPurge(&string);
+    stringShrinkBuffer(&string);
     stringLog(&string);
     String copy = stringCopy(&string);
     stringLog(&copy);
@@ -17,6 +16,7 @@ void lifetimeTest(void) {
 
     String null = stringCreate("");
     stringLog(&null);
+    stringFree(&null);
 }
 
 void ioTest(void) {
@@ -28,10 +28,13 @@ void ioTest(void) {
     stringFree(&test);
     stringLog(&test);
 
+    stringFree(&test);
+
     test = stringCreate("Hello!\n");
     FILE* file = fopen("iotest.txt", "w");
     fStringPrint(&test, file);
     fclose(file);
+    stringFree(&test);
 }
 
 void manipTest(void) {
@@ -54,14 +57,20 @@ void manipTest(void) {
 
     String sub = stringSubstring(&a, 10, 14);
     stringLog(&sub);
+
+    stringFree(&a);
+    stringFree(&sub);
 }
 
 void searchingTest(void) {
     String a = stringCreate("Hello, World!");
     String b = stringCreate("World!");
-    printf("'World!' first occurance: index %zu.\n", stringIndexOf(&a, &b));
+    printf("'World!' first occurance: index %zu.\n", stringIndexOf(&a, &b, 5));
     printf("Comparision of strings: %d.\n", stringCompare(&a, &b));
     printf("String ends with 'World'? %d.\n", stringEndsWith(&a, &b));
+
+    stringFree(&a);
+    stringFree(&b);
 }
 
 void stringBufferTest(void) {
@@ -80,12 +89,126 @@ void stringBufferTest(void) {
     stringLog(&string);
     char* data = stringGetCString(&string);
     printf("%s", data);
+    free(data);
+    stringFree(&string);
+}
+
+void extraProcessingTest(void) {
+    String string = stringCreate("Hello\n");
+    stringLog(&string);
+    String toInsert = stringCreate("arp");
+    stringLog(&toInsert);
+    stringInsert(&string, &toInsert, 1);
+    stringInsert(&string, &toInsert, 7);
+    stringLog(&string);
+    stringPrint(&string);
+    stringDelete(&string, 1, 4);
+    stringLog(&string);
+    stringFree(&string);
+    stringFree(&toInsert);
+
+    String sentence = stringCreate("This is a simple sentence.");
+    String space = stringCreate(" ");
+    String empty = stringCreate("");
+    stringReplace(&sentence, &space, &empty);
+    stringLog(&sentence);
+
+    stringToUpper(&sentence);
+    stringLog(&sentence);
+    stringToLower(&sentence);
+    stringLog(&sentence);
+
+    stringReverse(&sentence);
+    stringLog(&sentence);
+
+    stringFree(&sentence);
+    stringFree(&space);
+    stringFree(&empty);
+}
+
+void comparisionTest(void) {
+    String string = stringCreate("Hello");
+    String copy = stringCopy(&string);
+    printf("Equal: %d\n", stringEquals(&string, &copy));
+    stringFree(&copy);
+    copy = stringCreate("Not equal");
+    printf("Equal: %d\n", stringEquals(&string, &copy));
+    stringFree(&string);
+    stringFree(&copy);
+
+    String a = stringCreate("Hello, World");
+    String b = stringCreate("Hello");
+    printf("Starts with: %d\n", stringStartsWith(&a, &b));
+    stringFree(&b);
+    b = stringCreateEmpty();
+    printf("Starts with: %d\n", stringStartsWith(&a, &b));
+    stringFree(&b);
+    b = stringCreate("ello");
+    printf("Starts with: %d\n", stringStartsWith(&a, &b));
+
+    printf("Contains: %d\n", stringContains(&a, &b));
+
+    stringFree(&b);
+    b = stringCreate("o");
+    printf("Last 'o': %zu\n", stringLastIndexOf(&a, &b, 0));
+
+    stringFree(&a);
+    stringFree(&b);
+}
+
+void stringArrayTest(void) {
+    StringArray array = stringArrayCreate(3);
+    array.data[0] = stringCreate("One");
+    array.data[1] = stringCreate("two");
+    array.data[2] = stringCreate("three.\n");
+
+    for(size_t i = 0; i < array.length; i++) {
+        stringPrint(&array.data[i]);
+    }
+
+    String seperator = stringCreate(", ");
+    String joined = stringJoinArray(&seperator, &array);
+    stringPrint(&joined);
+
+    stringSet(&seperator, "\n");
+    String otherJoined = stringJoin(
+        &seperator, 3, 
+        &array.data[0], 
+        &array.data[1], 
+        &array.data[2]
+    );
+
+    stringPrint(&otherJoined);
+
+    stringFree(&seperator);
+    stringFree(&joined);
+    stringFree(&otherJoined);
+
+    stringArrayFreeDeep(&array);
+
+    String sentence = stringCreate("This is a simple sentence");
+    String delimiter = stringCreate(" ");
+    StringArray splitted = stringSplit(&sentence, &delimiter);
+
+    for(size_t i = 0; i < splitted.length; i++) {
+        stringPrint(&splitted.data[i]);
+        printf("\n");
+    }
+
+    stringFree(&sentence);
+    stringFree(&delimiter);
+    stringArrayFreeDeep(&splitted);
 }
 
 int main(void) {
-    String string = stringCreateEmpty();
-    stringSetFormat(&string, "Number: %d, Decimal: %f, String: %s\n", 5, 2.324, "Hello");
-    stringPrint(&string);
-
+    lifetimeTest();
+    ioTest();
+    manipTest();
+    searchingTest();
+    stringBufferTest();
+    extraProcessingTest();
+    extraProcessingTest();
+    comparisionTest();
+    stringArrayTest();
     return 0;
 }
