@@ -690,6 +690,7 @@ String stringSubstring(const String* string, const size_t start, const size_t en
 
     String substring = stringCreateSize(requiredSize);
     memcpy(substring.data, &(string->data[start]), requiredSize);
+    substring.length = requiredSize;
 
     return substring;
 }
