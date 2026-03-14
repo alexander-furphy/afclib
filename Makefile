@@ -32,12 +32,15 @@ LIB_NAME = strlib
 LIB_ARCHIVE_NAME = libstrlib.a
 LIB_DIR = $(DIST_DIR)/$(LIB_NAME)
 
-# Find all source files
-SRCS := $(wildcard $(SRC_DIR)/*.c)
-# Substitution: change src/main.c -> build/main.o
-OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-# Filter out the main object file from the full list
-LIB_OBJS = $(filter-out $(OBJ_DIR)/main.o, $(OBJS))
+LIB_SRC_FILES = src/str_lib.c
+DIST_HEADERS = include/str_lib.h
+
+# Automatically generate the object paths for these library files
+LIB_OBJS = $(LIB_SRC_FILES:src/%.c=$(OBJ_DIR)/%.o)
+
+# Keep your "Main" or "Test" file separate
+APP_SRC = src/main.c src/str_tests.c
+APP_OBJ = $(OBJ_DIR)/main.o
 
 # --- Rules ---
 all: $(TARGET) run
@@ -45,7 +48,7 @@ all: $(TARGET) run
 archive: $(LIB_OBJS)
 	@$(call MKDIR, $(LIB_DIR))
 	@ar rcs $(LIB_DIR)/$(LIB_ARCHIVE_NAME) $(LIB_OBJS)
-	@$(CP) $(call FIX_PATH, include/*.h) $(call FIX_PATH, $(LIB_DIR)/)
+	@$(CP) $(call FIX_PATH, $(DIST_HEADERS)) $(call FIX_PATH, $(LIB_DIR)/)
 	@$(call ZIP, $(LIB_DIR), $(DIST_DIR)/$(LIB_NAME).zip)
 	@echo Library created at $(LIB_DIR)
 
@@ -58,10 +61,15 @@ debug: $(TARGET)
 	@leaks -quiet -atExit -- ./$(TARGET)
 
 # The Linking Rule
-$(TARGET): $(OBJS)
+$(TARGET): $(APP_OBJ) $(LIB_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-# The Compilation Rule
+# Rule for the main app/test file
+$(APP_OBJ): $(APP_SRC)
+	@$(call MKDIR, $(dir $@))
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Rule for all library files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(call MKDIR, $(dir $@))
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -1,3 +1,5 @@
+#pragma region // Old Tests
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "str_lib.h"
@@ -208,14 +210,9 @@ void stringArrayTest(void) {
     stringArrayFreeDeep(&splitted);
 }
 
+#pragma endregion
+
 int main(void) {
-    lifetimeTest();
-    ioTest();
-    manipTest();
-    searchingTest();
-    stringBufferTest();
-    extraProcessingTest();
-    comparisionTest();
-    stringArrayTest();
+    
     return 0;
 }
