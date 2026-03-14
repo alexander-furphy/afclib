@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <stdint.h>
 
 //
 // ---------------- Macros ----------------
@@ -508,7 +509,11 @@ size_t stringLastIndexOf(const String* string, const String* other, const size_t
     }
 
     // Start searching from the back of the array minus the length of the other string
-    for(size_t i = string->length - other->length - 1 - startIndex; i >= 0; i--) {
+    // Using post decrement to avoid unsigned integer underflow.
+    size_t i = string->length - other->length - startIndex;
+    while(i > 0) {
+        i--;
+
         // Use memcmp in a forward direction
         if(!memcmp(&(string->data[i]), other->data, other->length)) {
             return i;
