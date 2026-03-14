@@ -40,7 +40,7 @@ LIB_OBJS = $(LIB_SRC_FILES:src/%.c=$(OBJ_DIR)/%.o)
 
 # Keep your "Main" or "Test" file separate
 APP_SRC = src/main.c src/str_tests.c
-APP_OBJ = $(OBJ_DIR)/main.o
+APP_OBJS = $(APP_SRC:src/%.c=$(OBJ_DIR)/%.o)
 
 # --- Rules ---
 all: $(TARGET) run
@@ -61,13 +61,8 @@ debug: $(TARGET)
 	@leaks -quiet -atExit -- ./$(TARGET)
 
 # The Linking Rule
-$(TARGET): $(APP_OBJ) $(LIB_OBJS)
+$(TARGET): $(APP_OBJS) $(LIB_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
-
-# Rule for the main app/test file
-$(APP_OBJ): $(APP_SRC)
-	@$(call MKDIR, $(dir $@))
-	$(CC) $(CFLAGS) -c $< -o $@
 
 # Rule for all library files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
