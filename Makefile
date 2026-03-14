@@ -32,14 +32,14 @@ LIB_NAME = strlib
 LIB_ARCHIVE_NAME = libstrlib.a
 LIB_DIR = $(DIST_DIR)/$(LIB_NAME)
 
-LIB_SRC_FILES = src/str_lib.c
-DIST_HEADERS = include/str_lib.h
+LIB_SRC_FILES = src/string_lib.c src/string_wrappers.c
+DIST_HEADERS = include/string_lib.h include/string_wrappers.h
 
 # Automatically generate the object paths for these library files
 LIB_OBJS = $(LIB_SRC_FILES:src/%.c=$(OBJ_DIR)/%.o)
 
 # Keep your "Main" or "Test" file separate
-APP_SRC = src/main.c src/str_tests.c
+APP_SRC = src/main.c src/string_tests.c
 APP_OBJS = $(APP_SRC:src/%.c=$(OBJ_DIR)/%.o)
 
 # --- Rules ---

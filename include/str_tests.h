@@ -10,5 +10,6 @@ void strTestBasic(void);
 void strTestSearch(void);
 void strTestTransformation(void);
 void strTestProcessing(void);
+void strTestWrappers(void);
 
 #endif // STR_TESTS_H

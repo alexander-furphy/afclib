@@ -55,6 +55,12 @@ Written by Alexander Furphy.
 /// Code for not found. Used for seaching functions such as indexOf.
 #define STR_NOT_FOUND ((size_t)-1)
 
+/// Null check for a string pointer.
+#define STR_IS_NULL(s) (s == NULL || s->data == NULL)
+
+/// Null check for a string array pointer.
+#define STR_ARRAY_IS_NULL(a) (a == NULL || a->data == NULL)
+
 //
 // ---------------- Data ----------------
 //
@@ -152,15 +158,8 @@ char* stringGetCString(const String* string);
 // ---------------- Basic Modification ----------------
 //
 
-/// Copy a character array into an existing string.
-/// Only resizes the buffer if the character array exceeds the size of the buffer.
-void stringSet(String* string, const char* value);
-
 /// Append another string to the destination.
 void stringAppend(String* dest, const String* other);
-
-/// Append a C string to the destination.
-void stringAppendCStr(String* dest, const char* value);
 
 /// Insert another string into the string at the specified index.
 /// Will not execute if index is greater than the length of the string.

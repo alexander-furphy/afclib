@@ -1,6 +1,7 @@
 #include "str_tests.h"
 
-#include "str_lib.h"
+#include "string_lib.h"
+#include "string_wrappers.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -18,6 +19,7 @@ void strTestAll(void) {
     strTestSearch();
     strTestTransformation();
     strTestProcessing();
+    strTestWrappers();
 
     printf("\nAll string modules tested successfully.\n");
 }
@@ -242,13 +244,13 @@ void strTestBasic(void) {
     assert(string.data != NULL && string.length == 5);
 
     // ---------------- stringSet ----------------
-    stringSet(&string, "World");
+    stringSetCStr(&string, "World");
     assert(string.length == 5);
     assert(memcmp(string.data, "World", 5) == 0);
 
     // Setting STR_NULL does nothing
     String nullString = STR_NULL;
-    stringSet(&nullString, "Fail");
+    stringSetCStr(&nullString, "Fail");
     assert(STR_INVALID(nullString));
 
     // ---------------- stringAppend ----------------
@@ -590,4 +592,83 @@ void strTestProcessing(void) {
     stringFree(&c);
 
     printf("High-level string processing tested successfully.\n");
+}
+
+void strTestWrappers(void) {
+    printf("Testing C-string wrappers...\n");
+
+    // --- Set / Append ---
+    String s = stringCreate("Hello");
+    stringSetCStr(&s, "World");
+    assert(stringEqualsCStr(&s, "World"));
+
+    stringAppendCStr(&s, "!");
+    assert(stringEqualsCStr(&s, "World!"));
+
+    // --- Contains / Starts / Ends ---
+    assert(stringContainsCStr(&s, "World"));
+    assert(stringStartsWithCStr(&s, "World"));
+    assert(stringEndsWithCStr(&s, "!"));
+
+    // --- IndexOf / LastIndexOf ---
+    stringSetCStr(&s, "abcabcabc");
+
+    assert(stringIndexOfCStr(&s, "abc", 0) == 0);
+    assert(stringIndexOfCStr(&s, "abc", 1) == 3);
+
+    assert(stringLastIndexOfCStr(&s, "abc", 0) == 6);
+    assert(stringLastIndexOfCStr(&s, "abc", 3) == 3);
+
+    // --- Replace ---
+    stringSetCStr(&s, "one two two three");
+    stringReplaceCStr(&s, "two", "2");
+    assert(stringContainsCStr(&s, "2"));
+
+    // --- Split ---
+    stringSetCStr(&s, "a,b,c");
+
+    StringArray arr = stringSplitCStr(&s, ",");
+    assert(arr.length == 3);
+    assert(stringEqualsCStr(&arr.data[0], "a"));
+    assert(stringEqualsCStr(&arr.data[1], "b"));
+    assert(stringEqualsCStr(&arr.data[2], "c"));
+
+    stringArrayFreeDeep(&arr);
+
+    // --- Join (variadic) ---
+    String a = stringCreate("A");
+    String b = stringCreate("B");
+    String c = stringCreate("C");
+
+    String joined = stringJoinCStr(",", 3, &a, &b, &c);
+    assert(stringEqualsCStr(&joined, "A,B,C"));
+
+    stringFree(&joined);
+
+    // --- JoinArray ---
+    StringArray joinArr = stringArrayCreate(3);
+    joinArr.data[0] = stringCreate("X");
+    joinArr.data[1] = stringCreate("Y");
+    joinArr.data[2] = stringCreate("Z");
+
+    joined = stringJoinArrayCStr("-", &joinArr);
+    assert(stringEqualsCStr(&joined, "X-Y-Z"));
+
+    stringFree(&joined);
+    stringArrayFreeDeep(&joinArr);
+
+    // --- Equals ---
+    stringSetCStr(&s, "test");
+    assert(stringEqualsCStr(&s, "test"));
+    assert(!stringEqualsCStr(&s, "TEST"));
+
+    // --- Print (just ensure no crash) ---
+    stringPrintCStr("Wrapper print test\n");
+
+    stringFree(&s);
+    stringFree(&a);
+    stringFree(&b);
+    stringFree(&c);
+
+    printf("C-string wrappers tested successfully.\n");
 }

@@ -1,4 +1,4 @@
-#include "str_lib.h"
+#include "string_lib.h"
 
 //
 // ---------------- Includes ----------------
@@ -9,13 +9,6 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdint.h>
-
-//
-// ---------------- Macros ----------------
-//
-
-#define STR_IS_NULL(s) (s == NULL || s->data == NULL)
-#define STR_ARRAY_IS_NULL(a) (a == NULL || a->data == NULL)
 
 //
 // ---------------- String Array Functions ----------------
@@ -298,19 +291,6 @@ char* stringGetCString(const String* string) {
 // ---------------- Manipulation Functions ----------------
 //
 
-void stringSet(String* string, const char* value) {
-    if(STR_IS_NULL(string)) {
-        return;
-    }
-
-    size_t length = strlen(value);
-    stringReserve(string, length);
-
-    // Copy the data into the string.
-    memcpy(string->data, value, length);
-    string->length = length;
-}
-
 void stringAppend(String* dest, const String* other) {
     if(STR_IS_NULL(dest) || STR_IS_NULL(other)) {
         return;
@@ -323,20 +303,6 @@ void stringAppend(String* dest, const String* other) {
 
     // Copy the data to the end of the destination
     memcpy(&(dest->data[dest->length]), other->data, other->length);
-    dest->length = requiredLength;
-}
-
-void stringAppendCStr(String* dest, const char* value) {
-    if(STR_IS_NULL(dest) || value == NULL) {
-        return;
-    }
-
-    size_t valueLength = strlen(value);
-    size_t requiredLength = dest->length + valueLength;
-    stringReserve(dest, requiredLength);
-
-    // Copy the memory to the end of the destination
-    memcpy(&(dest->data[dest->length]), value, valueLength);
     dest->length = requiredLength;
 }
 
