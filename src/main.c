@@ -1,4 +1,4 @@
-#include "str_tests.h"
+#include "af_string_tests.h"
 
 int main(void) {
     strTestAll();

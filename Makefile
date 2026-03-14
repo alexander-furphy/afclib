@@ -2,9 +2,9 @@
 ifeq ($(OS),Windows_NT)
     # Windows Settings
     # Use 'cmd /c' to ensure we use standard Windows shell commands
-    RM = cmd /C del /Q /S
+    RM = cmd /C del /Q /S "$(1)"
     # Windows 'mkdir' creates parent directories by default if extensions are on
-    MKDIR = cmd /C if not exist $(subst /,\,$(1)) mkdir $(subst /,\,$(1))
+    MKDIR = cmd /C if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
     CP = copy /Y
     TARGET_EXT = .exe
     # Zip is not native to Windows CMD; we use a PowerShell wrapper
@@ -28,18 +28,18 @@ OBJ_DIR = build
 DIST_DIR = dist
 BASE_TARGET = program
 TARGET = $(BASE_TARGET)$(TARGET_EXT)
-LIB_NAME = strlib
-LIB_ARCHIVE_NAME = libstrlib.a
+LIB_NAME = afclib
+LIB_ARCHIVE_NAME = libafclib.a
 LIB_DIR = $(DIST_DIR)/$(LIB_NAME)
 
-LIB_SRC_FILES = src/string_lib.c src/string_wrappers.c
-DIST_HEADERS = include/string_lib.h include/string_wrappers.h
+LIB_SRC_FILES = src/af_string.c
+DIST_HEADERS = include/af_string.h
 
 # Automatically generate the object paths for these library files
 LIB_OBJS = $(LIB_SRC_FILES:src/%.c=$(OBJ_DIR)/%.o)
 
 # Keep your "Main" or "Test" file separate
-APP_SRC = src/main.c src/string_tests.c
+APP_SRC = src/main.c src/af_string_tests.c
 APP_OBJS = $(APP_SRC:src/%.c=$(OBJ_DIR)/%.o)
 
 # --- Rules ---
@@ -58,7 +58,11 @@ run: $(TARGET)
 
 # Run with leaks
 debug: $(TARGET)
+ifeq ($(OS),Darwin)
 	@leaks -quiet -atExit -- ./$(TARGET)
+else
+    @valgrind ./$(TARGET)
+endif
 
 # The Linking Rule
 $(TARGET): $(APP_OBJS) $(LIB_OBJS)

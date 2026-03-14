@@ -1,7 +1,6 @@
-#include "str_tests.h"
+#include "af_string_tests.h"
 
-#include "string_lib.h"
-#include "string_wrappers.h"
+#include "af_string.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
