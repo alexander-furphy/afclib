@@ -22,6 +22,10 @@
 //
 
 StringArray stringArrayCreate(const size_t length) {
+    if(length == 0) {
+        return STR_ARRAY_NULL;
+    }
+
     // Initialise to zero to avoid user trying to use garbage values
     String* data = calloc(length, sizeof(String));
 
@@ -218,6 +222,8 @@ void fStringLog(const String* string, FILE* stream) {
     fwrite(string->data, sizeof(char), string->length, stream);
 
     fprintf(stream, "']\n");
+
+    fflush(stdout);
 }
 
 void fStringPrint(const String* string, FILE* stream) {
@@ -226,6 +232,8 @@ void fStringPrint(const String* string, FILE* stream) {
     }
 
     fwrite(string->data, sizeof(char), string->length, stream);
+
+    fflush(stdout);
 }
 
 void stringLog(const String* string) {
@@ -510,7 +518,7 @@ size_t stringLastIndexOf(const String* string, const String* other, const size_t
 
     // Start searching from the back of the array minus the length of the other string
     // Using post decrement to avoid unsigned integer underflow.
-    size_t i = string->length - other->length - startIndex;
+    size_t i = string->length - other->length - startIndex + 1;
     while(i > 0) {
         i--;
 
@@ -709,43 +717,41 @@ StringArray stringSplit(const String* string, const String* delimiter) {
         return STR_ARRAY_NULL;
     }
 
-    // A split string will have at least one element
+    // Count the number of elements
     size_t requiredElements = 1;
     size_t currentIndex = 0;
     while(1) {
-        // Calculate the next index starting at the current index
-        currentIndex = stringIndexOf(string, delimiter, currentIndex);
-        
-        // If no string was found, there are no more elements
-        if(currentIndex == STR_NOT_FOUND) {
+        size_t next = stringIndexOf(string, delimiter, currentIndex);
+        if (next == STR_NOT_FOUND) {
             break;
         }
-
-        // Increase the index and elements
-        currentIndex += delimiter->length;
         requiredElements++;
+        currentIndex = next + delimiter->length;
     }
 
     // Create a new array of the calculated size
     StringArray array = stringArrayCreate(requiredElements);
 
-    // Loop for the required number of elements - 1
+    // Extract substrings
     currentIndex = 0;
-    size_t lastIndex = currentIndex;
-    for(size_t i = 0; i < requiredElements - 1; i++) {
-        // Calculate the next slice and increase the current index 
-        currentIndex = stringIndexOf(string, delimiter, currentIndex);
-        currentIndex += delimiter->length;
+    size_t lastIndex = 0;
+    for (size_t i = 0; i < requiredElements - 1; i++) {
+        size_t matchIndex = stringIndexOf(string, delimiter, lastIndex);
+        if (matchIndex == STR_NOT_FOUND) {
+            // Should never happen, but safeguard
+            array.data[i] = STR_NULL;
+            lastIndex = string->length;
+            continue;
+        }
 
-        // Add a new string
-        array.data[i] = stringSubstring(string, lastIndex, currentIndex);
+        // Substring excludes delimiter
+        array.data[i] = stringSubstring(string, lastIndex, matchIndex);
 
-        lastIndex = currentIndex;
+        lastIndex = matchIndex + delimiter->length; // Move past delimiter
     }
 
-    // Add the last slice as a substring that extends to the length of the string
-    currentIndex = string->length;
-    array.data[requiredElements - 1] = stringSubstring(string, lastIndex, currentIndex);
+    // Last element
+    array.data[requiredElements - 1] = stringSubstring(string, lastIndex, string->length);
 
     return array;
 }

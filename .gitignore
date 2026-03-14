@@ -1,5 +1,6 @@
 build/
 dist/
+tests/
 program
 program.exe
 iotest.txt
