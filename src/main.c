@@ -209,13 +209,13 @@ void stringArrayTest(void) {
 }
 
 int main(void) {
-    // lifetimeTest();
+    lifetimeTest();
     ioTest();
-    // manipTest();
-    // searchingTest();
-    // stringBufferTest();
-    // extraProcessingTest();
-    // comparisionTest();
-    // stringArrayTest();
+    manipTest();
+    searchingTest();
+    stringBufferTest();
+    extraProcessingTest();
+    comparisionTest();
+    stringArrayTest();
     return 0;
 }
