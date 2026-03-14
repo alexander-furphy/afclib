@@ -20,6 +20,8 @@ void lifetimeTest(void) {
 }
 
 void ioTest(void) {
+    printf("\n\n");
+
     String test = stringCreate("Test String!");
     stringPrint(&test);
     stringLog(&test);
@@ -31,10 +33,16 @@ void ioTest(void) {
     stringFree(&test);
 
     test = stringCreate("Hello!\n");
-    FILE* file = fopen("iotest.txt", "w");
+    FILE* file = fopen("iotest.txt", "a");
     fStringPrint(&test, file);
     fclose(file);
     stringFree(&test);
+
+    String fileData = stringReadFile("iotest.txt");
+    stringPrint(&fileData);
+    stringFree(&fileData);
+
+    printf("\n\n");
 }
 
 void manipTest(void) {
@@ -201,23 +209,13 @@ void stringArrayTest(void) {
 }
 
 int main(void) {
-    lifetimeTest();
+    // lifetimeTest();
     ioTest();
-    manipTest();
-    searchingTest();
-    stringBufferTest();
-    extraProcessingTest();
-    comparisionTest();
-    stringArrayTest();
+    // manipTest();
+    // searchingTest();
+    // stringBufferTest();
+    // extraProcessingTest();
+    // comparisionTest();
+    // stringArrayTest();
     return 0;
 }
-
-//
-//
-//
-// TODO: Write documentation for, validate, and optimise
-// the searching and inspection, transformation and cleaning, and high
-// level processing categories.
-//
-//
-//

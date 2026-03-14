@@ -1,19 +1,26 @@
 #include "str_lib.h"
+
+//
+// ---------------- Includes ----------------
+//
+
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
 
-#define STR_ALLOC_FAIL_MSG "Failed to allocate string of length"
+//
+// ---------------- Macros ----------------
+//
+
 #define STR_IS_NULL(s) (s == NULL || s->data == NULL)
 #define STR_ARRAY_IS_NULL(a) (a == NULL || a->data == NULL)
-#define STR_NOT_FOUND ((size_t)-1)
 
 //
 // ---------------- String Array Functions ----------------
 //
 
-StringArray stringArrayCreate(size_t length) {
+StringArray stringArrayCreate(const size_t length) {
     // Initialise to zero to avoid user trying to use garbage values
     String* data = calloc(length, sizeof(String));
 
@@ -76,7 +83,7 @@ String stringCreate(const char* value) {
     return string;
 }
 
-String stringCreateSize(size_t size) {
+String stringCreateSize(const size_t size) {
     if(size == 0) {
         return STR_NULL;
     }
@@ -99,7 +106,7 @@ void stringFree(String* string) {
     *string = STR_NULL;
 }
 
-String stringCopy(String* other) {
+String stringCopy(const String* other) {
     if(STR_IS_NULL(other)) {
         return STR_NULL;
     }
@@ -115,7 +122,7 @@ String stringCopy(String* other) {
     return (String){data, other->length, other->length};
 }
 
-void stringReserve(String* string, size_t size) {
+void stringReserve(String* string, const size_t size) {
     if(STR_IS_NULL(string)) {
         return;
     }
@@ -165,6 +172,34 @@ void stringShrinkBuffer(String* string) {
 //
 // ---------------- Formatting and IO ----------------
 //
+
+String stringReadFile(const char* path) {
+    // Open and exit on fail
+    FILE* file = fopen(path, "rb");
+    if(file == NULL) {
+        return STR_NULL;
+    }
+
+    // Calculate the length
+    fseek(file, 0, SEEK_END);
+    long length = ftell(file);
+    rewind(file);
+
+    if(length <= 0) {
+        fclose(file);
+        return STR_NULL;
+    }
+
+    // Create the string
+    String string = stringCreateSize(length);
+    fread(string.data, sizeof(char), length, file);
+    string.length = length;
+
+    // Clean up
+    fclose(file);
+
+    return string;
+}
 
 void fStringLog(const String* string, FILE* stream) {
     if(STR_IS_NULL(string)) {
@@ -230,7 +265,7 @@ void stringSetFormat(String* string, const char* format, ...) {
     va_end(args);
 }
 
-char* stringGetCString(String* string) {
+char* stringGetCString(const String* string) {
     if(STR_IS_NULL(string)) {
         return NULL;
     }
@@ -238,7 +273,6 @@ char* stringGetCString(String* string) {
     // Add an extra byte for the null terminator
     char* data = malloc((string->length + 1) * sizeof(char));
     if(data == NULL) {
-        fprintf(stderr, STR_ALLOC_FAIL_MSG " %zu.\n", string->length);
         return NULL;
     }
     
@@ -268,7 +302,7 @@ void stringSet(String* string, const char* value) {
     string->length = length;
 }
 
-void stringAppend(String* dest, String* other) {
+void stringAppend(String* dest, const String* other) {
     if(STR_IS_NULL(dest) || STR_IS_NULL(other)) {
         return;
     }
@@ -297,7 +331,7 @@ void stringAppendCStr(String* dest, const char* value) {
     dest->length = requiredLength;
 }
 
-void stringInsert(String* string, String* toInsert, size_t index) {
+void stringInsert(String* string, const String* toInsert, const size_t index) {
     if(STR_IS_NULL(string) || STR_IS_NULL(toInsert) || index > string->length) {
         return;
     }
@@ -319,7 +353,7 @@ void stringInsert(String* string, String* toInsert, size_t index) {
     string->length = requiredLength;
 }
 
-void stringDelete(String* string, size_t start, size_t end) {
+void stringDelete(String* string, const size_t start, const size_t end) {
     if(STR_IS_NULL(string) || start > string->length || end > string->length || start > end) {
         return;
     }
@@ -332,7 +366,7 @@ void stringDelete(String* string, size_t start, size_t end) {
     string->length -= end - start;
 }
 
-void stringReplace(String* string, String* old, String* new) {
+void stringReplace(String* string, const String* old, const String* new) {
     // Return if any string is null or the old is 0
     if(STR_IS_NULL(string) || STR_IS_NULL(old) || STR_IS_NULL(new) || old->length == 0) {
         return;
@@ -380,7 +414,7 @@ void stringReplace(String* string, String* old, String* new) {
     }
 }
 
-void stringScale(String* string, int scaler) {
+void stringScale(String* string, const int scaler) {
     if(STR_IS_NULL(string) || scaler <= 1) {
         return;
     }
@@ -409,18 +443,22 @@ void stringScale(String* string, int scaler) {
 // ---------------- Searching and Inspection ----------------
 //
 
-int stringCompare(String* a, String* b) {
-    size_t smallest = a->length < b->length ? a->length : b->length;
-
-    for(size_t i = 0; i < smallest; i++) {
-        if(a->data[i] < b->data[i]) return -1;
-        if(a->data[i] > b->data[i]) return 1;
+int stringCompare(const String* a, const String* b) {
+    if(STR_IS_NULL(a) || STR_IS_NULL(b)) {
+        return 0;
     }
 
-    return 0;
+    size_t smallest = a->length < b->length ? a->length : b->length;
+    int result = memcmp(a->data, b->data, smallest);
+
+    if(result == 0) {
+        return a->length - b->length;
+    }
+
+    return result > 0 ? 1 : -1;
 }
 
-int stringEquals(String* a, String* b) {
+int stringEquals(const String* a, const String* b) {
     // If the strings are null or of different lengths, they are not equal.
     if(STR_IS_NULL(a) || STR_IS_NULL(b) || a->length != b->length) {
         return 0;
@@ -438,11 +476,17 @@ int stringEquals(String* a, String* b) {
     return 1;
 }
 
-size_t stringIndexOf(String* string, String* other, size_t startIndex) {
-    if(other->length > string->length || other->length == 0) {
+size_t stringIndexOf(const String* string, const String* other, const size_t startIndex) {
+    if(STR_IS_NULL(string) || STR_IS_NULL(other)) {
         return STR_NOT_FOUND;
     }
 
+    // Illegal arguments
+    if(other->length > string->length || string->length == 0 || other->length == 0) {
+        return STR_NOT_FOUND;
+    }
+
+    // Loop through, stopping when length - other length is reached
     for(size_t i = startIndex; i <= string->length - other->length; i++) {
         // Check if the segment of the string is equal
         if(!memcmp(&(string->data[i]), other->data, other->length)) {
@@ -453,12 +497,19 @@ size_t stringIndexOf(String* string, String* other, size_t startIndex) {
     return STR_NOT_FOUND;
 }
 
-size_t stringLastIndexOf(String* string, String* other, size_t startIndex) {
-    if(other->length > string->length || other->length == 0) {
+size_t stringLastIndexOf(const String* string, const String* other, const size_t startIndex) {
+    if(STR_IS_NULL(string) || STR_IS_NULL(other)) {
         return STR_NOT_FOUND;
     }
 
+    // Illegal arguments
+    if(other->length > string->length || string->length == 0 || other->length == 0) {
+        return STR_NOT_FOUND;
+    }
+
+    // Start searching from the back of the array minus the length of the other string
     for(size_t i = string->length - other->length - 1 - startIndex; i >= 0; i--) {
+        // Use memcmp in a forward direction
         if(!memcmp(&(string->data[i]), other->data, other->length)) {
             return i;
         }
@@ -467,12 +518,19 @@ size_t stringLastIndexOf(String* string, String* other, size_t startIndex) {
     return STR_NOT_FOUND;
 }
 
-int stringStartsWith(String* string, String* prefix) {
+int stringStartsWith(const String* string, const String* prefix) {
+    if(STR_IS_NULL(string) || STR_IS_NULL(prefix)) {
+        return 0;
+    }
+
+    // Illegal arguments
     if(prefix->length > string->length) {
         return 0;
     }
 
+    // Loop through each character up to the prefix length
     for(size_t i = 0; i < prefix->length; i++) {
+        // Return false if the data is not equal
         if(string->data[i] != prefix->data[i]) {
             return 0;
         }
@@ -481,7 +539,12 @@ int stringStartsWith(String* string, String* prefix) {
     return 1;
 }
 
-int stringEndsWith(String* string, String* suffix) {
+int stringEndsWith(const String* string, const String* suffix) {
+    if(STR_IS_NULL(string) || STR_IS_NULL(suffix)) {
+        return 0;
+    }
+    
+    // Illegal arguments
     if(suffix->length > string->length) {
         return 0;
     }
@@ -495,7 +558,13 @@ int stringEndsWith(String* string, String* suffix) {
     return 1;
 }
 
-int stringContains(String* string, String* other) {
+int stringContains(const String* string, const String* other) {
+    // Null checks are required because stringIndexOf 
+    // returns STR_NOT_FOUND if either string is null
+    if(STR_IS_NULL(string) || STR_IS_NULL(other)) {
+        return 0;
+    }
+
     return stringIndexOf(string, other, 0) != STR_NOT_FOUND;
 }
 
@@ -504,18 +573,30 @@ int stringContains(String* string, String* other) {
 //
 
 void stringStrip(String* string) {
+    if(STR_IS_NULL(string)) {
+        return;
+    }
+
     stringTrimLeft(string);
     stringTrimRight(string);
 }
 
 void stringTrimLeft(String* string) {
-    if(string->length == 0) return;
+    if(STR_IS_NULL(string)) {
+        return;
+    }
 
+    if(string->length == 0) {
+        return;
+    }
+
+    // Calculate the first non whitespace index
     size_t start = 0;
     while(start < string->length && isspace((unsigned char)string->data[start])) {
         start++;
     }
 
+    // Return an empty string if the whole string was whitespace
     if(start == string->length) {
         String empty = stringCreate("");
         stringFree(string);
@@ -523,20 +604,28 @@ void stringTrimLeft(String* string) {
         return;
     }
 
+    // Create a substring for the new string
     String newStr = stringSubstring(string, start, string->length);
     stringFree(string);
     *string = newStr;
 }
 
 void stringTrimRight(String* string) {
-    if(string->length == 0) return;
+    if(STR_IS_NULL(string)) {
+        return;
+    }
 
-    // Keep decrementing until the current character is not a space
+    if(string->length == 0) {
+        return;
+    }
+
+    // Calculate the first non whitespace index
     size_t end = string->length - 1;
     while(end > 0 && isspace((unsigned char)string->data[end])) {
         end--;
     }
 
+    // Return an empty string if the whole string was whitespace
     if(end == 0) {
         String empty = stringCreate("");
         stringFree(string);
@@ -544,7 +633,8 @@ void stringTrimRight(String* string) {
         return;
     }
 
-    // Adding one because substring exclusive
+    // Create a substring for the new string
+    // Adding one because substring is exclusive
     String newStr = stringSubstring(string, 0, end + 1);
     stringFree(string);
     *string = newStr;
@@ -579,6 +669,7 @@ void stringReverse(String* string) {
         string->data[i] = copy.data[string->length - i - 1];
     }
 
+    // Free the copy
     stringFree(&copy);
 }
 
@@ -586,45 +677,57 @@ void stringReverse(String* string) {
 // ---------------- High Level Processing ----------------
 //
 
-String stringSubstring(String* string, size_t start, size_t end) {
+String stringSubstring(const String* string, const size_t start, const size_t end) {
+    if(STR_IS_NULL(string)) {
+        return STR_NULL;
+    }
+
     if(start > end || start > string->length || end > string->length) {
-        fprintf(stderr, "Invalid substr ptrs: start=%zu, end=%zu.\n", start, end);
         return STR_NULL;
     }
 
     size_t requiredSize = end - start;
 
-    char* data = malloc(requiredSize * sizeof(char));
-    if(data == NULL) {
-        fprintf(stderr, STR_ALLOC_FAIL_MSG " %zu.\n", requiredSize);
-        return STR_NULL;
-    }
+    String substring = stringCreateSize(requiredSize);
+    memcpy(substring.data, &(string->data[start]), requiredSize);
 
-    memcpy(data, &(string->data[start]), requiredSize);
-
-    return (String){data, requiredSize, requiredSize};
+    return substring;
 }
 
-StringArray stringSplit(String* string, String* delimiter) {
+StringArray stringSplit(const String* string, const String* delimiter) {
+    if(STR_IS_NULL(string) || STR_IS_NULL(delimiter)) {
+        return STR_ARRAY_NULL;
+    }
+
+    if(string->length == 0 || delimiter->length == 0 || delimiter->length > string->length) {
+        return STR_ARRAY_NULL;
+    }
+
     // A split string will have at least one element
     size_t requiredElements = 1;
     size_t currentIndex = 0;
     while(1) {
+        // Calculate the next index starting at the current index
         currentIndex = stringIndexOf(string, delimiter, currentIndex);
         
+        // If no string was found, there are no more elements
         if(currentIndex == STR_NOT_FOUND) {
             break;
         }
 
+        // Increase the index and elements
         currentIndex += delimiter->length;
         requiredElements++;
     }
 
+    // Create a new array of the calculated size
     StringArray array = stringArrayCreate(requiredElements);
 
+    // Loop for the required number of elements - 1
     currentIndex = 0;
     size_t lastIndex = currentIndex;
     for(size_t i = 0; i < requiredElements - 1; i++) {
+        // Calculate the next slice and increase the current index 
         currentIndex = stringIndexOf(string, delimiter, currentIndex);
         currentIndex += delimiter->length;
 
@@ -634,13 +737,14 @@ StringArray stringSplit(String* string, String* delimiter) {
         lastIndex = currentIndex;
     }
 
+    // Add the last slice as a substring that extends to the length of the string
     currentIndex = string->length;
     array.data[requiredElements - 1] = stringSubstring(string, lastIndex, currentIndex);
 
     return array;
 }
 
-String stringJoin(String* seperator, size_t count, ...) {
+String stringJoin(const String* seperator, const size_t count, ...) {
     va_list args, argsCopy;
     va_start(args, count);
 
@@ -675,7 +779,7 @@ String stringJoin(String* seperator, size_t count, ...) {
     return string;
 }
 
-String stringJoinArray(String* seperator, StringArray* array) {
+String stringJoinArray(const String* seperator, const StringArray* array) {
     // Calculate the required length
     size_t requiredLength = 0;
     for(size_t i = 0; i < array->length; i++) {
