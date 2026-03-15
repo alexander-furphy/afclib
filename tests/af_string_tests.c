@@ -179,8 +179,8 @@ void strTestIO(void) {
     ci_assert(stringGetCString(&STR_NULL) == NULL);
 
     // ---------------- fStringPrint / fStringLog ----------------
-    char tmpFilePath[256];
-    snprintf(tmpFilePath, 14, "tmp_stream.txt");
+    char tmpFilePath[16];
+    snprintf(tmpFilePath, sizeof(tmpFilePath), "tmp_stream.txt");
 
     FILE* tmpStream = fopen(tmpFilePath, "w+b");
     ci_assert(tmpStream != NULL);
@@ -208,7 +208,8 @@ void strTestIO(void) {
     remove(tmpFilePath);
 
     // ---------------- stringReadFile ----------------
-    snprintf(tmpFilePath, 15, "strtest_tmp.txt");
+    char tmpFilePath2[17];
+    snprintf(tmpFilePath2, sizeof(tmpFilePath2), "strtest_tmp.txt");
 
     FILE* file = fopen(tmpFilePath, "wb");
     ci_assert(file != NULL);
