@@ -1,12 +1,11 @@
-afclib
-------
+# afclib
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 afclib is a C library that contains modules for **string handling**,
-**generic data structures**, and **design pattern frameworks**. Ideal
-as a standard library for **general purpose C programming**, making
-common tasks easier and more reliable.
+**generic data structures**, and **design pattern frameworks**. It
+serves as a lightweight, standard library for **general-purpose C 
+programming**, making common tasks easier and more reliable.
 
 ## Installation
 
@@ -38,7 +37,6 @@ int main(void) {
     return 0;
 }
 ```
-**Output**
 ```
 HELLO WORLD
 HELLO
