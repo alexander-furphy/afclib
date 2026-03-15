@@ -64,6 +64,7 @@ endif
 
 # Run the target
 run: $(TARGET)
+	@echo "Running all tests..."
 ifeq ($(OS),Windows_NT)
 	$(TARGET)
 else
