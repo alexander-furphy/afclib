@@ -35,33 +35,47 @@ LIB_DIR = $(DIST_DIR)/$(LIB_NAME)
 LIB_SRC_FILES = src/af_string.c
 DIST_HEADERS = include/af_string.h
 
-# Automatically generate the object paths for these library files
 LIB_OBJS = $(LIB_SRC_FILES:src/%.c=$(OBJ_DIR)/%.o)
 
-# Keep your "Main" or "Test" file separate
-APP_SRC = src/main.c src/af_string_tests.c
-APP_OBJS = $(APP_SRC:src/%.c=$(OBJ_DIR)/%.o)
+APP_SRC = tests/af_string_tests.c
+APP_OBJS = $(APP_SRC:tests/%.c=$(OBJ_DIR)/%.o)
 
 # --- Rules ---
 all: $(TARGET) run
 
 archive: $(LIB_OBJS)
 	@$(call MKDIR, $(LIB_DIR))
+	@$(call MKDIR, $(LIB_DIR)/include)
 	@ar rcs $(LIB_DIR)/$(LIB_ARCHIVE_NAME) $(LIB_OBJS)
-	@$(CP) $(call FIX_PATH, $(DIST_HEADERS)) $(call FIX_PATH, $(LIB_DIR)/)
+	@$(CP) $(call FIX_PATH, $(DIST_HEADERS)) $(call FIX_PATH, $(LIB_DIR)/include/)
 	@$(call ZIP, $(LIB_DIR), $(DIST_DIR)/$(LIB_NAME).zip)
 	@echo Library created at $(LIB_DIR)
 
+install: archive
+ifeq (($OS),Windows_NT)
+	@echo "Manual install on Windows: copy headers and .a to your preferred location"
+else
+	@sudo mkdir -p /usr/local/lib
+	@sudo mkdir -p /usr/local/include
+	@sudo cp $(LIB_DIR)/libafclib.a /usr/local/lib/
+	@sudo cp $(LIB_DIR)/include/*.h /usr/local/include/
+	@echo "Library installed to /usr/local/lib and headers to /usr/local/include"
+endif
+
 # Run the target
 run: $(TARGET)
+ifeq ($(OS),Windows_NT)
+	@$(TARGET)
+else
 	@./$(TARGET)
+endif
 
 # Run with leaks
 debug: $(TARGET)
 ifeq ($(OS),Darwin)
 	@leaks -quiet -atExit -- ./$(TARGET)
 else
-    @valgrind ./$(TARGET)
+	@valgrind ./$(TARGET)
 endif
 
 # The Linking Rule
@@ -70,6 +84,11 @@ $(TARGET): $(APP_OBJS) $(LIB_OBJS)
 
 # Rule for all library files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@$(call MKDIR, $(dir $@))
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Rule for test files
+$(OBJ_DIR)/%.o: tests/%.c
 	@$(call MKDIR, $(dir $@))
 	$(CC) $(CFLAGS) -c $< -o $@
 
