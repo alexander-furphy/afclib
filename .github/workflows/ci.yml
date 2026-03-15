@@ -30,4 +30,4 @@ jobs:
       - name: Run Tests
         # --test-dir build tells ctest where to find the test executables
         # --output-on-failure shows your printf/logs if a test fails
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --output-on-failure -C Debug
