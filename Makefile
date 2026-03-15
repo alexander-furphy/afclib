@@ -65,9 +65,9 @@ endif
 # Run the target
 run: $(TARGET)
 ifeq ($(OS),Windows_NT)
-	@$(TARGET)
+	$(TARGET)
 else
-	@./$(TARGET)
+	./$(TARGET)
 endif
 
 # Run with leaks
