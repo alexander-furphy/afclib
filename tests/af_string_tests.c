@@ -132,7 +132,7 @@ void strTestArrays(void) {
     for (size_t i = 0; i < array.length; i++) {
         array.data[i] = stringCreate("Test");
     }
-    stringArrayFree(&array);
+    stringArrayFreeDeep(&array);
     // The strings are still allocated
     for (size_t i = 0; i < 5; i++) {
         ci_assert(array.data == NULL || STR_INVALID(array.data[i])); // array.data should be NULL after free
@@ -429,6 +429,7 @@ void strTestTransformation(void) {
     stringStrip(&string);
     ci_assert(string.length == 11); // "Hello World"
     ci_assert(memcmp(string.data, "Hello World", 11) == 0);
+    stringFree(&string);
 
     // STR_NULL and empty string
     stringStrip(&nullString);

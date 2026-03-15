@@ -29,31 +29,32 @@ set(CPACK_GENERATOR "TGZ;ZIP")
 include(CPack)
 
 # ---------------- Debug and Sanitizer Setup ----------------
+file(GLOB TEST_SOURCES "tests/*.c")
+enable_testing()
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # 1. DEFINE OS-SPECIFIC FLAGS
     if(MSVC)
         set(DEBUG_FLAGS /fsanitize=address /Zi /Od /RTC1-)
         set(DEBUG_LINK_FLAGS /incremental:no)
+    elseif(APPLE)
+        # ON MAC: Disable ASan entirely to allow the 'leaks' tool to function
+        set(DEBUG_FLAGS -g -O0)
+        set(DEBUG_LINK_FLAGS "")
     else()
-        # Basic ASan for both Mac and Linux
-        set(DEBUG_FLAGS -fsanitize=address -fno-omit-frame-pointer -g)
-        set(DEBUG_LINK_FLAGS -fsanitize=address)
-
-        if(NOT APPLE)
-            # Linux gets the explicit flags
-            list(APPEND DEBUG_FLAGS -fsanitize=leak)
-            list(APPEND DEBUG_LINK_FLAGS -fsanitize=leak)
-        endif()
+        # ON LINUX: Keep ASan and LeakSanitizer active
+        set(DEBUG_FLAGS -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -g)
+        set(DEBUG_LINK_FLAGS -fsanitize=address -fsanitize=leak)
     endif()
 
-    # Apply to Library
+    # 2. APPLY TO LIBRARY
     target_compile_options(${PROJECT_NAME} PRIVATE ${DEBUG_FLAGS})
     target_link_options(${PROJECT_NAME} PRIVATE ${DEBUG_LINK_FLAGS})
 
-    # Apply to Tests and fix the "abort" on Mac
+    # 3. APPLY TO TESTS
     foreach(test_file ${TEST_SOURCES})
         get_filename_component(test_name ${test_file} NAME_WE)
         
-        # Ensure target is defined before setting properties
         if(NOT TARGET ${test_name})
             add_executable(${test_name} ${test_file})
             target_link_libraries(${test_name} PRIVATE ${PROJECT_NAME})
@@ -63,12 +64,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_link_options(${test_name} PRIVATE ${DEBUG_LINK_FLAGS})
 
         if(APPLE)
-            # FORCE Mac to ignore leaks during the ASan run to prevent the abort
-            # Then wrap it in the 'leaks' tool to actually find the leak
-            set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0")
-            add_test(NAME ${test_name} COMMAND leaks -atExit -- $<TARGET_FILE:${test_name}>)
+            # Use native macOS tool for the actual test command
+            add_test(NAME ${test_name} 
+                 COMMAND bash -c "$<TARGET_FILE:${test_name}> && leaks -quiet -atExit -- $<TARGET_FILE:${test_name}> | grep -v 'Binary Images:'"
+            )
         else()
-            # Linux/Windows run normally
             add_test(NAME ${test_name} COMMAND ${test_name})
         endif()
     endforeach()
