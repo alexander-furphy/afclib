@@ -161,14 +161,6 @@ void strTestArrays(void) {
 void strTestIO(void) {
     printf("Testing string IO and formatting (using tests/ folder)...\n");
 
-    // ---------------- Setup tests folder ----------------
-    const char* testFolder = "tests";
-#ifdef _WIN32
-    _mkdir(testFolder);  // Windows
-#else
-    mkdir(testFolder, 0755);  // POSIX
-#endif
-
     // ---------------- stringSetFormat ----------------
     String string = stringCreate("Init");
     stringSetFormat(&string, "Hello %d %s", 42, "World");
@@ -188,7 +180,7 @@ void strTestIO(void) {
 
     // ---------------- fStringPrint / fStringLog ----------------
     char tmpFilePath[256];
-    snprintf(tmpFilePath, sizeof(tmpFilePath), "%s/tmp_stream.txt", testFolder);
+    snprintf(tmpFilePath, 14, "tmp_stream.txt");
 
     FILE* tmpStream = fopen(tmpFilePath, "w+b");
     ci_assert(tmpStream != NULL);
@@ -216,7 +208,7 @@ void strTestIO(void) {
     remove(tmpFilePath);
 
     // ---------------- stringReadFile ----------------
-    snprintf(tmpFilePath, sizeof(tmpFilePath), "%s/strtest_tmp.txt", testFolder);
+    snprintf(tmpFilePath, 15, "strtest_tmp.txt");
 
     FILE* file = fopen(tmpFilePath, "wb");
     ci_assert(file != NULL);
