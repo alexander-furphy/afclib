@@ -15,7 +15,7 @@ common tasks easier and more reliable.
 - **Lightweight:** No external dependencies, and small build size.
 
 ## Examples
-```
+```c
 #include "af_string.h"
 
 int main(void) {
@@ -25,11 +25,24 @@ int main(void) {
 
     String delimiter = stringCreate(" ");
     StringArray array = stringSplit(&string, &delimiter);
-    for(size_t i = 0; i < array.length; i++) {
-        stringPrint(&array.data[i]);
-        printf("\n");
-    }
+    String newline = stringCreate("\n");
+    String joined = stringJoinArray(&newline, &array);
+    stringPrint(&joined);
+
+    stringFree(&string);
+    stringFree(&delimiter);
+    stringFree(&newline);
+    stringFree(&joined);
+    stringArrayFreeDeep(&array);
+
+    return 0;
 }
+```
+**Output**
+```
+HELLO WORLD
+HELLO
+WORLD
 ```
 
 ## License
