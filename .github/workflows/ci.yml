@@ -1,4 +1,4 @@
-name: C Library CI
+name: Library CI
 
 # Run CI on pushes and pull requests to main
 on:
