@@ -43,7 +43,8 @@ endforeach()
 # ---------------- Debug and Sanitizer Setup ----------------
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE /fsanitize=address)
+        target_compile_options(${PROJECT_NAME} PRIVATE /fsanitize=address /Zi /Od /RTC1-)
+        target_link_options(${PROJECT_NAME} PRIVATE /incremental:no)
     else()
         # Common flags for ASan and LeakSanitizer
         set(DEBUG_FLAGS -fsanitize=address -fsanitize=address -fno-omit-frame-pointer -g)
