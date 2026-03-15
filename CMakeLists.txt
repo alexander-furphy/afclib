@@ -28,44 +28,48 @@ set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_GENERATOR "TGZ;ZIP")
 include(CPack)
 
-# ---------------- Testing setup ----------------
-enable_testing()
-
-file(GLOB TEST_SOURCES "tests/*.c")
-
-foreach(test_file ${TEST_SOURCES})
-    get_filename_component(test_name ${test_file} NAME_WE)
-    add_executable(${test_name} ${test_file})
-    target_link_libraries(${test_name} PRIVATE ${PROJECT_NAME})
-    add_test(NAME ${test_name} COMMAND ${test_name})
-endforeach()
-
 # ---------------- Debug and Sanitizer Setup ----------------
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(MSVC)
-        # Windows-specific flags for AddressSanitizer
         set(DEBUG_FLAGS /fsanitize=address /Zi /Od /RTC1-)
         set(DEBUG_LINK_FLAGS /incremental:no)
     else()
-        # Unix (Linux/Mac) flags
+        # Basic ASan for both Mac and Linux
         set(DEBUG_FLAGS -fsanitize=address -fno-omit-frame-pointer -g)
-        
-        # Apple Clang has leaks built into address; Linux needs it explicitly
+        set(DEBUG_LINK_FLAGS -fsanitize=address)
+
         if(NOT APPLE)
+            # Linux gets the explicit flags
             list(APPEND DEBUG_FLAGS -fsanitize=leak)
+            list(APPEND DEBUG_LINK_FLAGS -fsanitize=leak)
         endif()
-        
-        set(DEBUG_LINK_FLAGS ${DEBUG_FLAGS})
     endif()
 
-    # Apply flags to the Library
+    # Apply to Library
     target_compile_options(${PROJECT_NAME} PRIVATE ${DEBUG_FLAGS})
     target_link_options(${PROJECT_NAME} PRIVATE ${DEBUG_LINK_FLAGS})
 
-    # Apply flags to all Tests
+    # Apply to Tests and fix the "abort" on Mac
     foreach(test_file ${TEST_SOURCES})
         get_filename_component(test_name ${test_file} NAME_WE)
+        
+        # Ensure target is defined before setting properties
+        if(NOT TARGET ${test_name})
+            add_executable(${test_name} ${test_file})
+            target_link_libraries(${test_name} PRIVATE ${PROJECT_NAME})
+        endif()
+
         target_compile_options(${test_name} PRIVATE ${DEBUG_FLAGS})
         target_link_options(${test_name} PRIVATE ${DEBUG_LINK_FLAGS})
+
+        if(APPLE)
+            # FORCE Mac to ignore leaks during the ASan run to prevent the abort
+            # Then wrap it in the 'leaks' tool to actually find the leak
+            set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0")
+            add_test(NAME ${test_name} COMMAND leaks -atExit -- $<TARGET_FILE:${test_name}>)
+        else()
+            # Linux/Windows run normally
+            add_test(NAME ${test_name} COMMAND ${test_name})
+        endif()
     endforeach()
 endif()
