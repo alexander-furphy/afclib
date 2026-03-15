@@ -43,24 +43,29 @@ endforeach()
 # ---------------- Debug and Sanitizer Setup ----------------
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE /fsanitize=address /Zi /Od /RTC1-)
-        target_link_options(${PROJECT_NAME} PRIVATE /incremental:no)
+        # Windows-specific flags for AddressSanitizer
+        set(DEBUG_FLAGS /fsanitize=address /Zi /Od /RTC1-)
+        set(DEBUG_LINK_FLAGS /incremental:no)
     else()
-        # Common flags for ASan and LeakSanitizer
-        set(DEBUG_FLAGS -fsanitize=address -fsanitize=address -fno-omit-frame-pointer -g)
-
+        # Unix (Linux/Mac) flags
+        set(DEBUG_FLAGS -fsanitize=address -fno-omit-frame-pointer -g)
+        
+        # Apple Clang has leaks built into address; Linux needs it explicitly
         if(NOT APPLE)
             list(APPEND DEBUG_FLAGS -fsanitize=leak)
         endif()
-
-        target_compile_options(${PROJECT_NAME} PRIVATE ${DEBUG_FLAGS})
-        target_link_options(${PROJECT_NAME} PRIVATE ${DEBUG_FLAGS})
-
-        # Apply to tests as well so they catch leaks in the library
-        foreach(test_file ${TEST_SOURCES})
-            get_filename_component(test_name ${test_file} NAME_WE)
-            target_compile_options(${test_name} PRIVATE ${DEBUG_FLAGS})
-            target_link_options(${test_name} PRIVATE ${DEBUG_FLAGS})
-        endforeach()
+        
+        set(DEBUG_LINK_FLAGS ${DEBUG_FLAGS})
     endif()
+
+    # Apply flags to the Library
+    target_compile_options(${PROJECT_NAME} PRIVATE ${DEBUG_FLAGS})
+    target_link_options(${PROJECT_NAME} PRIVATE ${DEBUG_LINK_FLAGS})
+
+    # Apply flags to all Tests
+    foreach(test_file ${TEST_SOURCES})
+        get_filename_component(test_name ${test_file} NAME_WE)
+        target_compile_options(${test_name} PRIVATE ${DEBUG_FLAGS})
+        target_link_options(${test_name} PRIVATE ${DEBUG_LINK_FLAGS})
+    endforeach()
 endif()
