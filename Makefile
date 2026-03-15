@@ -4,7 +4,7 @@ ifeq ($(OS),Windows_NT)
     # Use 'cmd /c' to ensure we use standard Windows shell commands
     RM = cmd /C del /Q /S "$(1)"
     # Windows 'mkdir' creates parent directories by default if extensions are on
-    MKDIR = cmd /C if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
+    MKDIR = powershell -Command "New-Item -ItemType Directory -Force -Path '$(subst /,\,$(1))' > $null"
     CP = copy /Y
     TARGET_EXT = .exe
     # Zip is not native to Windows CMD; we use a PowerShell wrapper
