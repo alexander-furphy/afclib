@@ -18,6 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # 2. On Windows, locate the ASan DLL and add it to the PATH
+      - name: Add MSVC ASan to PATH (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $msvc = vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $asan_path = Get-ChildItem -Path "$msvc\VC\Tools\MSVC" -Recurse -Filter "clang_rt.asan_dynamic-x86_64.dll" | Select-Object -First 1 -ExpandProperty DirectoryName
+          echo "$asan_path" >> $env:GITHUB_PATH
+
       - name: Configure CMake
         # -B build creates the build directory
         # -DCMAKE_BUILD_TYPE=Debug ensures your ASan/Leak logic is active
