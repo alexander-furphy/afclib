@@ -2,8 +2,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <errno.h>
+
+#ifdef _WIN32
+#include <direct.h>  // for _mkdir
+#else
+#include <sys/stat.h>  // for mkdir
+#include <sys/types.h>
+#endif
 
 /* Global counter for failed ci_asserts */
 static int ci_ci_assert_failures = 0;
