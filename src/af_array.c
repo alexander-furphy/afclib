@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ARRAY_INDEX(a, i) ((a)->data + ((i) * array->elementSize))
+#define ARRAY_INDEX(a, i) ((char*)(a)->data + ((i) * array->elementSize))
 
 Array arrayCreate(size_t elementSize, size_t capacity) {
     if(elementSize == 0 || capacity == 0) {
