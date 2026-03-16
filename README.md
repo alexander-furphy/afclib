@@ -1,7 +1,7 @@
 # afclib
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![CI](https://github.com/FourthRealm/afclib/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/alexander-furphy/afclib/actions/workflows/ci.yml/badge.svg)
 
 afclib is a C library that contains modules for **string handling**,
 **generic data structures\***, and **design pattern frameworks\***. It
