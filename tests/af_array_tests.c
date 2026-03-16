@@ -33,14 +33,13 @@ void arrayTestGetSet(void) {
     arraySet(&intArray, 4, &val2);
 
     // Get and verify values
-    int* res1 = (int*)arrayGet(&intArray, 0);
-    int* res4 = (int*)arrayGet(&intArray, 4);
+    int get0;
+    arrayGet(&intArray, 0, &get0);
+    int get4;
+    arrayGet(&intArray, 4, &get4);
 
-    assert(res1 != NULL);
-    assert(*res1 == 42);
-
-    assert(res4 != NULL);
-    assert(*res4 == 100);
+    assert(get0 == 42);
+    assert(get4 == 100);
 
     arrayFree(&intArray);
 
@@ -54,14 +53,18 @@ void arrayTestGetSet(void) {
     arraySet(&doubleArray, 6, &db);
 
     // Get values
-    double* ref1 = arrayGet(&doubleArray, 1);
-    double* ref2 = arrayGet(&doubleArray, 6);
+    double get1;
+    arrayGet(&doubleArray, 1, &get1);
+    double get6 = 0;
+    // Get 6 will not be written because out of bounds.
+    arrayGet(&doubleArray, 6, &get6);
+    double get3;
+    arrayGet(&doubleArray, 3, &get3);
 
     // Assert values
-    assert(ref1 != NULL);
-    assert(*ref1 == 5.34);
-
-    assert(ref2 == NULL);
+    assert(get1 == 5.34);
+    assert(get6 == 0);
+    assert(get3 == 0);
 
     arrayFree(&doubleArray);
 }
@@ -80,10 +83,15 @@ void arrayTestNullMacros(void) {
 
 void intArrayDestructor(Array* array) {
     for(size_t i = 0; i < array->capacity; i++) {
-        int** element = arrayGet(array, i);
-        if(*element != NULL) {
-            free(*element);
-            *element = NULL;
+        int* element;
+        arrayGet(array, i, &element);
+        if(element != NULL) {
+            free(element);
+            element = NULL;
+            arraySet(array, i, &element);
+            int* retrieved;
+            arrayGet(array, i, &retrieved);
+            assert(retrieved == NULL);
         }
     }
 }
@@ -101,9 +109,10 @@ void arrayTestDestructors(void) {
     arraySet(&intPtrArray, 0, &element);
 
     // Ensure retrieved item is correct
-    int** retrieved = arrayGet(&intPtrArray, 0);
+    int* retrieved;
+    arrayGet(&intPtrArray, 0, &retrieved);
     assert(retrieved != NULL);
-    assert(**retrieved == 5);
+    assert(*retrieved == 5);
 
     // Add another element
     element = malloc(sizeof(int));
@@ -112,13 +121,13 @@ void arrayTestDestructors(void) {
     arraySet(&intPtrArray, 3, &element);
 
     // Ensure retrieved item is correct
-    retrieved = arrayGet(&intPtrArray, 3);
+    arrayGet(&intPtrArray, 3, &retrieved);
     assert(retrieved != NULL);
-    assert(**retrieved == 10);
+    assert(*retrieved == 10);
 
     arrayClear(&intPtrArray);
-    printf("%p\n", arrayGet(&intPtrArray, 0));
-    assert(*((int**)arrayGet(&intPtrArray, 0)) == NULL);
+    arrayGet(&intPtrArray, 0, &retrieved);
+    assert(retrieved == NULL);
 
     // Free the array (uses destructor)
     // Memory leaks/bad accessing will be caught by tools
@@ -130,14 +139,18 @@ void arrayTestCopy(void) {
     Array array = arrayCreate(sizeof(int), capacity);
     for(int i = 0; i < (int)capacity; i++) {
         arraySet(&array, i, &i);
-        assert(*((int*)arrayGet(&array, i)) == i);
+        int retrieved;
+        arrayGet(&array, i, &retrieved);
+        assert(retrieved == i);
     }
 
     Array copy = arrayCopy(&array);
     assert(copy.capacity == capacity);
     assert(copy.elementSize == sizeof(int));
     for(int i = 0; i < (int)capacity; i++) {
-        assert(*((int*)arrayGet(&copy, i)) == i);
+        int retrieved;
+        arrayGet(&array, i, &retrieved);
+        assert(retrieved == i);
     }
 
     arrayFree(&array);

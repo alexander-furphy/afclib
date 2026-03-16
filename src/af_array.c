@@ -81,12 +81,12 @@ void arrayClear(Array* array) {
     }
 }
 
-void* arrayGet(Array* array, size_t index) {
+void arrayGet(Array* array, size_t index, void* dest) {
     if(ARRAY_IS_NULL(array) || index >= array->capacity) {
-        return NULL;
+        return;
     }
 
-    return ARRAY_INDEX(array, index);
+    memcpy(dest, ARRAY_INDEX(array, index), array->elementSize);
 }
 
 void arraySet(Array* array, size_t index, void* data) {

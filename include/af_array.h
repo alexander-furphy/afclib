@@ -24,7 +24,7 @@ void arraySetDestructor(Array* array, ArrayDestructor destructor);
 void arrayReserve(Array* array, size_t newCapacity);
 void arrayFree(Array* array);
 void arrayClear(Array* array);
-void* arrayGet(Array* array, size_t index);
+void arrayGet(Array* array, size_t index, void* dest);
 void arraySet(Array* array, size_t index, void* data);
 
 #endif // AF_ARRAY_H
