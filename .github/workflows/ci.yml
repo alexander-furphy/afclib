@@ -30,10 +30,6 @@ jobs:
           $asan_path = Get-ChildItem -Path "$msvc\VC\Tools\MSVC" -Recurse -Filter "clang_rt.asan_dynamic-x86_64.dll" | Select-Object -First 1 -ExpandProperty DirectoryName
           echo "$asan_path" >> $env:GITHUB_PATH
 
-      - name: Remove macOS Quarantine
-        if: runner.os == 'macOS'
-        run: xattr -dr com.apple.quarantine ./build/
-
       - name: Configure CMake
         # -B build creates the build directory
         # -DCMAKE_BUILD_TYPE=Debug ensures your ASan/Leak logic is active
@@ -42,6 +38,10 @@ jobs:
       - name: Build Library and Tests
         # --build build runs the correct compiler for the OS (gcc, clang, or msvc)
         run: cmake --build build
+
+      - name: Remove macOS Quarantine
+        if: runner.os == 'macOS'
+        run: xattr -dr com.apple.quarantine ./build/
 
       - name: Ad-hoc Sign and Run Tests (macOS)
         if: runner.os == 'macOS'
