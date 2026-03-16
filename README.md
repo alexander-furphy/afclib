@@ -4,11 +4,27 @@
 ![CI](https://github.com/FourthRealm/afclib/actions/workflows/ci.yml/badge.svg)
 
 afclib is a C library that contains modules for **string handling**,
-**generic data structures**, and **design pattern frameworks**. It
+**generic data structures\***, and **design pattern frameworks\***. It
 serves as a lightweight, standard library for **general-purpose C 
 programming**, making common tasks easier and more reliable.
 
+**\* features are currently in development**
+
 ## Installation
+
+**macOS/Linux**
+Use the Makefile convenience wrapper:
+make install
+
+This puts all files in /usr/local/include/.
+Headers should be included with **angle brackets <>.**
+
+Link with:
+gcc main.c -lafclib -o program
+
+**Windows**
+Build using CMake to generate a Visual Studio solution:
+cmake -B build
 
 ## Features
 - **String Handling:** Buffered, heap allocated strings with all common operations included.
@@ -16,7 +32,7 @@ programming**, making common tasks easier and more reliable.
 
 ## Examples
 ```c
-#include "af_string.h"
+#include <af_string.h>
 
 int main(void) {
     String string = stringCreate("Hello World\n");

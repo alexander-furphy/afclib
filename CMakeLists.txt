@@ -5,6 +5,7 @@ project(afclib VERSION 0.1.0 LANGUAGES C)
 # ---------------- C configuration ----------------
 set(C_STANDARD_REQUIRED 99)
 set(C_STANDARD_REQUIRED ON)
+set(ENV{CTEST_OUTPUT_ON_FAILURE} 1)
 
 # ---------------- Collect all sources and headers ----------------
 file(GLOB SOURCES "src/*.c")
@@ -12,9 +13,15 @@ file(GLOB HEADERS "include/*.h")
 
 # ---------------- Library setup ----------------
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(${PROJECT_NAME}
+    BEFORE
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 # ---------------- Archive / Installation ----------------
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -31,6 +38,8 @@ include(CPack)
 # ---------------- Debug and Sanitizer Setup ----------------
 file(GLOB TEST_SOURCES "tests/*.c")
 enable_testing()
+
+set_tests_properties(${test_name} PROPERTIES ON_FAILURE_LOG 1)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     # 1. DEFINE OS-SPECIFIC FLAGS

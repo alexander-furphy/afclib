@@ -36,6 +36,18 @@ endif
 dist: build
 	cd $(BUILD_DIR) && cpack
 
+install: dist
+	sudo cmake --install build
+
+uninstall:
+	@if [ -f build/install_manifest.txt ]; then \
+		echo "Uninstalling files..."; \
+		sudo xargs rm < build/install_manifest.txt; \
+		echo "Cleanup complete."; \
+	else \
+		echo "No install manifest found. Nothing to uninstall."; \
+	fi
+
 # Wipe the build directory
 clean:
 	rm -rf $(BUILD_DIR)
@@ -43,8 +55,10 @@ clean:
 # Help Menu
 help:
 	@echo "afclib Build Shortcuts:"
-	@echo "  make        - Standard release build"
-	@echo "  make debug  - Build with debug symbols & sanitizers"
-	@echo "  make test   - Run all tests (shows leaks on Mac/Linux)"
-	@echo "  make dist   - Create library archives"
-	@echo "  make clean  - Remove all build artifacts"
+	@echo "  make        		- Standard release build"
+	@echo "  make debug  		- Build with debug symbols & sanitizers"
+	@echo "  make test   		- Run all tests (shows leaks on Mac/Linux)"
+	@echo "  make dist   		- Create library archives"
+	@echo "  make install"		- Build and install the library
+	@echo "  make uninstall"	- Removes all installed files from system
+	@echo "  make clean  		- Remove all build artifacts"

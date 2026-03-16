@@ -25,7 +25,7 @@ static int ci_ci_assert_failures = 0;
 } while(0)
 
 /* Call at the end of main to set proper exit code */
-static void ci_ci_assert_exit() {
+static void ci_assert_exit() {
     if (ci_ci_assert_failures > 0) {
         fprintf(stderr, "Total ci_assertion failures: %d\n", ci_ci_assert_failures);
         exit(1);  /* Non-zero exit code for CI */
@@ -33,8 +33,6 @@ static void ci_ci_assert_exit() {
 }
 
 void strTestLifetime(void) {
-    printf("Testing lifetime and memory management...\n");
-
     // ---------------- Creation ----------------
     // Normal string creation
     String string = stringCreate("Hello");
@@ -105,13 +103,9 @@ void strTestLifetime(void) {
     stringFree(&string);
     stringFree(&nullString); // freeing STR_NULL is safe
     ci_assert(STR_INVALID(string) && STR_INVALID(nullString));
-
-    printf("Lifetime and memory management tested successfully.\n");
 }
 
 void strTestArrays(void) {
-    printf("Testing string array functions...\n");
-
     // ---------------- stringArrayCreate ----------------
     StringArray array = stringArrayCreate(5);
     ci_assert(array.length == 5);
@@ -154,13 +148,9 @@ void strTestArrays(void) {
     stringArrayFree(&nullArray);
     stringArrayFreeDeep(&nullArray);
     ci_assert(STR_ARRAY_INVALID(nullArray));
-
-    printf("String array functions tested successfully.\n");
 }
 
 void strTestIO(void) {
-    printf("Testing string IO and formatting (using tests/ folder)...\n");
-
     // ---------------- stringSetFormat ----------------
     String string = stringCreate("Init");
     stringSetFormat(&string, "Hello %d %s", 42, "World");
@@ -233,13 +223,9 @@ void strTestIO(void) {
 
     remove(tmpFilePath);
     stringFree(&string);
-
-    printf("String IO and formatting (tests/ folder) tested successfully.\n");
 }
 
 void strTestBasic(void) {
-    printf("Testing basic string manipulation...\n");
-
     // ---------------- Setup ----------------
     String string = stringCreate("Hello");
     ci_assert(string.data != NULL && string.length == 5);
@@ -345,13 +331,9 @@ void strTestBasic(void) {
     stringFree(&newStr);
     stringFree(&scaleStr);
     stringFree(&nullString);
-
-    printf("Basic string manipulation tested successfully.\n");
 }
 
 void strTestSearch(void) {
-    printf("Testing string search and inspection functions...\n");
-
     // ---------------- Setup ----------------
     String s1 = stringCreate("HelloWorld");
     String s2 = stringCreate("World");
@@ -413,13 +395,9 @@ void strTestSearch(void) {
     stringFree(&s5);
     stringFree(&s6);
     stringFree(&sub);
-
-    printf("String search and inspection tested successfully.\n");
 }
 
 void strTestTransformation(void) {
-    printf("Testing string transformation and cleaning functions...\n");
-
     // ---------------- Setup ----------------
     String string = stringCreate("   Hello World   ");
     String emptyString = stringCreateSize(10); // initially empty buffer
@@ -483,13 +461,9 @@ void strTestTransformation(void) {
     stringFree(&string);
     stringFree(&emptyString);
     stringFree(&nullString);
-
-    printf("String transformation and cleaning tested successfully.\n");
 }
 
 void strTestProcessing(void) {
-    printf("Testing high-level string processing functions...\n");
-
     // ---------------- Setup ----------------
     String s = stringCreate("Hello,World,Test");
     String delim = stringCreate(",");
@@ -592,13 +566,9 @@ void strTestProcessing(void) {
     stringFree(&a);
     stringFree(&b);
     stringFree(&c);
-
-    printf("High-level string processing tested successfully.\n");
 }
 
 void strTestWrappers(void) {
-    printf("Testing C-string wrappers...\n");
-
     // --- Set / Append ---
     String s = stringCreate("Hello");
     stringSetCStr(&s, "World");
@@ -671,14 +641,10 @@ void strTestWrappers(void) {
     stringFree(&a);
     stringFree(&b);
     stringFree(&c);
-
-    printf("C-string wrappers tested successfully.\n");
 }
 
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
-
-    printf("Testing all string modules...\n\n");
 
     strTestLifetime();
     strTestArrays();
@@ -689,10 +655,8 @@ int main(void) {
     strTestProcessing();
     strTestWrappers();
 
-    printf("\nAll string modules tested successfully.\n");
-
     // Exit if failiure
-    ci_ci_assert_exit();
+    ci_assert_exit();
 
     return 0;
 }
