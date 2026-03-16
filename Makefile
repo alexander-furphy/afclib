@@ -26,7 +26,7 @@ debug:
 test: debug
 ifeq ($(OS),Darwin)
 	@echo "Running tests with macOS leaks tool..."
-	ctest --test-dir $(BUILD_DIR) -VV
+	ctest --test-dir $(BUILD_DIR) --output-on-failure -VV
 else
 	@echo "Running tests with AddressSanitizer..."
 	ctest --test-dir $(BUILD_DIR) --output-on-failure
