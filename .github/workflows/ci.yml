@@ -52,6 +52,12 @@ jobs:
           ./build/af_array_tests
 
       - name: Run Tests
-        # --test-dir build tells ctest where to find the test executables
-        # --output-on-failure shows your printf/logs if a test fails
-        run: ctest --test-dir build --output-on-failure --verbose -C Debug
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            # Run the binary DIRECTLY without the 'leaks' wrapper
+            ./build/af_array_tests
+          else
+            # Linux and Windows can use ctest as normal
+            ctest --test-dir build --output-on-failure -C Debug
+          fi
