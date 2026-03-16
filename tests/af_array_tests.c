@@ -1,5 +1,6 @@
 #include "af_array.h"
 #include <assert.h>
+#include <stdio.h>
 
 void arrayTestLifecycle(void) {
     size_t cap = 10;
@@ -72,8 +73,11 @@ void arrayTestNullMacros() {
 }
 
 int main(void) {
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     arrayTestLifecycle();
     arrayTestGetSet();
     arrayTestNullMacros();
+
     return 0;
 }
