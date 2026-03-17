@@ -44,8 +44,8 @@ set_tests_properties(${test_name} PROPERTIES ON_FAILURE_LOG 1)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     # 1. DEFINE OS-SPECIFIC FLAGS
     if(MSVC)
-        set(DEBUG_FLAGS /fsanitize=address /Zi /Od /RTC1-)
-        set(DEBUG_LINK_FLAGS /incremental:no)
+        set(DEBUG_FLAGS /Zi /Od /RTC1)
+        set(DEBUG_LINK_FLAGS "")
     elseif(APPLE)
         # Disable ASan so leaks works
         set(DEBUG_FLAGS -g -O0) 
