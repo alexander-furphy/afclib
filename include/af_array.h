@@ -57,7 +57,7 @@ struct Array {
 };
 
 //
-// ---------------- Macros ----------------
+// ---------------- Macros and Inline Functions ----------------
 //
 
 /// Represents a null/invalid array.

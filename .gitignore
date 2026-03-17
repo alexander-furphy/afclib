@@ -2,6 +2,3 @@ build/
 dist/
 Testing/
 .vscode/
-program
-program.exe
-iotest.txt

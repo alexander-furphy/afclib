@@ -52,7 +52,7 @@ typedef struct StringArray {
 } StringArray;
 
 //
-// ---------------- Macros ----------------
+// ---------------- Macros and Inline Functions ----------------
 //
 
 /// Represents a null string.
