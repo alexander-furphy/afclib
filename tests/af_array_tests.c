@@ -8,14 +8,14 @@ void arrayTestLifecycle(void) {
     Array intArray = arrayCreate(sizeof(int), cap);
     
     // Test if creation worked
-    assert(!ARRAY_INVALID(intArray));
+    assert(!arrayIsInvalid(intArray));
     assert(intArray.elementSize == sizeof(int));
     assert(intArray.capacity == cap);
     assert(intArray.data != NULL);
     assert(intArray.destructor == NULL);
 
     arrayReserve(&intArray, 20);
-    assert(!ARRAY_INVALID(intArray));
+    assert(!arrayIsInvalid(intArray));
     assert(intArray.capacity == 20);
 
     // Test freeing (assuming it zeros out the struct)
@@ -71,14 +71,14 @@ void arrayTestGetSet(void) {
 
 void arrayTestNullMacros(void) {    
     Array empty = ARRAY_NULL;
-    assert(ARRAY_INVALID(empty));
+    assert(arrayIsInvalid(empty));
 
     Array charArray = arrayCreate(sizeof(char), 1);
-    assert(!ARRAY_INVALID(charArray));
-    assert(!ARRAY_IS_NULL(&charArray));
+    assert(!arrayIsInvalid(charArray));
+    assert(!arrayIsNull(&charArray));
 
     arrayFree(&charArray);
-    assert(ARRAY_IS_NULL(&charArray));
+    assert(arrayIsNull(&charArray));
 }
 
 void intArrayDestructor(Array* array) {
@@ -154,7 +154,7 @@ void arrayTestCopy(void) {
     }
 
     arrayFree(&array);
-    assert(!ARRAY_INVALID(copy));
+    assert(!arrayIsInvalid(copy));
     arrayFree(&copy);
 }
 

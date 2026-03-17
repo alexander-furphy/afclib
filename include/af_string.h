@@ -30,36 +30,7 @@ Written by Alexander Furphy.
 
 #include <stddef.h>
 #include <stdio.h>
-
-//
-// ---------------- Macros ----------------
-//
-
-/// Represents a null string.
-#define STR_NULL ((String){.data = NULL, .length = 0, .capacity = 0})
-
-/// Boolean check to see if a string is valid.
-/// Does not work for string pointers.
-#define STR_INVALID(s) ((s).data == NULL)
-
-/// Represents a null string array.
-#define STR_ARRAY_NULL ((StringArray){.data = NULL, .length = 0})
-
-/// Boolean check to see if a string array is valid.
-/// Does not work for string array pointers.
-#define STR_ARRAY_INVALID(s) ((s).data == NULL)
-
-/// Output stream used by all IO functions that don't specify a stream.
-#define STR_STD_PRINT (stdout)
-
-/// Code for not found. Used for seaching functions such as indexOf.
-#define STR_NOT_FOUND ((size_t)-1)
-
-/// Null check for a string pointer.
-#define STR_IS_NULL(s) (s == NULL || s->data == NULL)
-
-/// Null check for a string array pointer.
-#define STR_ARRAY_IS_NULL(a) (a == NULL || a->data == NULL)
+#include <stdbool.h>
 
 //
 // ---------------- Data ----------------
@@ -79,6 +50,44 @@ typedef struct StringArray {
     String* data;
     size_t length;
 } StringArray;
+
+//
+// ---------------- Macros ----------------
+//
+
+/// Represents a null string.
+#define STRING_NULL ((String){0})
+
+/// Represents a null string array.
+#define STRING_ARRAY_NULL ((StringArray){0})
+
+/// Output stream used by all IO functions that don't specify a stream.
+#define STRING_SDT_PRINT (stdout)
+
+/// Code for not found. Used for seaching functions such as indexOf.
+#define STRING_NOT_FOUND ((size_t)-1)
+
+/// Boolean check to see if a string is valid.
+/// Does not work for string pointers.
+static inline bool stringIsInvalid(const String string) {
+    return string.data == NULL;
+}
+
+/// Null check for a string pointer.
+static inline bool stringIsNull(const String* string) {
+    return string == NULL || string->data == NULL;
+}
+
+/// Boolean check to see if a string array is valid.
+/// Does not work for string array pointers.
+static inline bool stringArrayIsInvalid(const StringArray array) {
+    return array.data == NULL;
+}
+
+/// Null check for a string array pointer.
+static inline bool stringArrayIsNull(const StringArray* array) {
+    return array == NULL || array->data == NULL;
+}
 
 //
 // ---------------- String Array Functions ----------------

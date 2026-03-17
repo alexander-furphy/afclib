@@ -36,6 +36,25 @@ Written by Alexander Furphy.
 //
 
 #include <stddef.h>
+#include <stdbool.h>
+
+//
+// ---------------- Data ----------------
+//
+
+// Forward declare array
+typedef struct Array Array;
+
+/// Function pointer that gets a reference to an array.
+typedef void (*ArrayDestructor)(Array*);
+
+/// Stores a generic array object (data, element size, capacity, destructor).
+struct Array {
+    void* data;
+    size_t elementSize;
+    size_t capacity;
+    ArrayDestructor destructor;
+};
 
 //
 // ---------------- Macros ----------------
@@ -45,27 +64,14 @@ Written by Alexander Furphy.
 #define ARRAY_NULL ((Array){0})
 
 /// Check to see if an array is invalid.
-#define ARRAY_INVALID(a) ((a).data == NULL)
+static inline bool arrayIsInvalid(const Array array) {
+    return array.data == NULL;
+}
 
 /// Check to see if an array reference is null, or the array within it is invalid.
-#define ARRAY_IS_NULL(a) ((a) == NULL || ARRAY_INVALID(*(a)))
-
-//
-// ---------------- Data ----------------
-//
-
-struct Array;
-
-/// Function pointer that gets a reference to an array.
-typedef void (*ArrayDestructor)(struct Array*);
-
-/// Stores a generic array object (data, element size, capacity, destructor).
-typedef struct Array {
-    void* data;
-    size_t elementSize;
-    size_t capacity;
-    ArrayDestructor destructor;
-} Array;
+static inline bool arrayIsNull(const Array* array) {
+    return array == NULL || arrayIsInvalid(*array);
+}
 
 //
 // ---------------- Functions ----------------

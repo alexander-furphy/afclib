@@ -40,7 +40,7 @@ void strTestLifetime(void) {
 
     // Free valid string
     stringFree(&string);
-    ci_assert(STR_INVALID(string) && string.length == 0 && string.capacity == 0);
+    ci_assert(stringIsInvalid(string) && string.length == 0 && string.capacity == 0);
 
     // Creation with size
     string = stringCreateSize(16);
@@ -49,11 +49,11 @@ void strTestLifetime(void) {
 
     // Edge case: creation size 0 returns STR_NULL
     string = stringCreateSize(0);
-    ci_assert(STR_INVALID(string) && string.length == 0 && string.capacity == 0);
+    ci_assert(stringIsInvalid(string) && string.length == 0 && string.capacity == 0);
 
     // Edge case: create empty string literal returns STR_NULL
     string = stringCreate("");
-    ci_assert(STR_INVALID(string) && string.length == 0 && string.capacity == 0);
+    ci_assert(stringIsInvalid(string) && string.length == 0 && string.capacity == 0);
 
     // ---------------- Copy ----------------
     string = stringCreate("Hello");
@@ -62,8 +62,8 @@ void strTestLifetime(void) {
     ci_assert(memcmp(copy.data, string.data, string.length) == 0);
 
     // Copying STR_NULL returns STR_NULL
-    String nullCopy = stringCopy(&STR_NULL);
-    ci_assert(STR_INVALID(nullCopy));
+    String nullCopy = stringCopy(&STRING_NULL);
+    ci_assert(stringIsInvalid(nullCopy));
 
     stringFree(&copy);
     stringFree(&nullCopy);
@@ -79,9 +79,9 @@ void strTestLifetime(void) {
     ci_assert(string.capacity >= string.length);
 
     // Reserving STR_NULL should remain STR_NULL
-    String nullString = STR_NULL;
+    String nullString = STRING_NULL;
     stringReserve(&nullString, 5);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- Shrink Buffer ----------------
     stringShrinkBuffer(&string);
@@ -89,7 +89,7 @@ void strTestLifetime(void) {
 
     // Shrinking STR_NULL should remain STR_NULL
     stringShrinkBuffer(&nullString);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- Clear ----------------
     stringClear(&string);
@@ -97,12 +97,12 @@ void strTestLifetime(void) {
 
     // Clearing STR_NULL should do nothing
     stringClear(&nullString);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- Free ----------------
     stringFree(&string);
     stringFree(&nullString); // freeing STR_NULL is safe
-    ci_assert(STR_INVALID(string) && STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(string) && stringIsInvalid(nullString));
 }
 
 void strTestArrays(void) {
@@ -113,7 +113,7 @@ void strTestArrays(void) {
 
     // Verify all elements are STR_NULL
     for (size_t i = 0; i < array.length; i++) {
-        ci_assert(STR_INVALID(array.data[i]));
+        ci_assert(stringIsInvalid(array.data[i]));
     }
 
     // Zero-length array
@@ -129,7 +129,7 @@ void strTestArrays(void) {
     stringArrayFreeDeep(&array);
     // The strings are still allocated
     for (size_t i = 0; i < 5; i++) {
-        ci_assert(array.data == NULL || STR_INVALID(array.data[i])); // array.data should be NULL after free
+        ci_assert(array.data == NULL || stringIsInvalid(array.data[i])); // array.data should be NULL after free
     }
 
     // ---------------- stringArrayFreeDeep ----------------
@@ -144,10 +144,10 @@ void strTestArrays(void) {
     ci_assert(array.length == 0);
 
     // Freeing STR_NULL array is safe
-    StringArray nullArray = STR_ARRAY_NULL;
+    StringArray nullArray = STRING_ARRAY_NULL;
     stringArrayFree(&nullArray);
     stringArrayFreeDeep(&nullArray);
-    ci_assert(STR_ARRAY_INVALID(nullArray));
+    ci_assert(stringArrayIsInvalid(nullArray));
 }
 
 void strTestIO(void) {
@@ -157,8 +157,8 @@ void strTestIO(void) {
     ci_assert(string.length == strlen("Hello 42 World"));
     ci_assert(memcmp(string.data, "Hello 42 World", string.length) == 0);
 
-    stringSetFormat(&STR_NULL, "Fail");
-    ci_assert(STR_INVALID(STR_NULL));
+    stringSetFormat(&STRING_NULL, "Fail");
+    ci_assert(stringIsInvalid(STRING_NULL));
 
     // ---------------- stringGetCString ----------------
     char* cstr = stringGetCString(&string);
@@ -166,7 +166,7 @@ void strTestIO(void) {
     ci_assert(strcmp(cstr, "Hello 42 World") == 0);
     free(cstr);
 
-    ci_assert(stringGetCString(&STR_NULL) == NULL);
+    ci_assert(stringGetCString(&STRING_NULL) == NULL);
 
     // ---------------- fStringPrint / fStringLog ----------------
     char tmpFilePath[16];
@@ -191,8 +191,8 @@ void strTestIO(void) {
     fread(buffer, 1, sizeof(buffer), tmpStream);
     ci_assert(strstr(buffer, "Hello 42 World") != NULL);
 
-    fStringPrint(&STR_NULL, tmpStream);
-    fStringLog(&STR_NULL, tmpStream);
+    fStringPrint(&STRING_NULL, tmpStream);
+    fStringLog(&STRING_NULL, tmpStream);
 
     fclose(tmpStream);
     remove(tmpFilePath);
@@ -213,13 +213,13 @@ void strTestIO(void) {
 
     // Reading non-existent file returns STR_NULL
     fileString = stringReadFile("tests/nonexistentfile.txt");
-    ci_assert(STR_INVALID(fileString));
+    ci_assert(stringIsInvalid(fileString));
 
     // Reading empty file returns STR_NULL
     file = fopen(tmpFilePath, "wb");
     fclose(file);
     fileString = stringReadFile(tmpFilePath);
-    ci_assert(STR_INVALID(fileString));
+    ci_assert(stringIsInvalid(fileString));
 
     remove(tmpFilePath);
     stringFree(&string);
@@ -236,9 +236,9 @@ void strTestBasic(void) {
     ci_assert(memcmp(string.data, "World", 5) == 0);
 
     // Setting STR_NULL does nothing
-    String nullString = STR_NULL;
+    String nullString = STRING_NULL;
     stringSetCStr(&nullString, "Fail");
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- stringAppend ----------------
     String appendStr = stringCreate("123");
@@ -247,7 +247,7 @@ void strTestBasic(void) {
     ci_assert(memcmp(string.data, "World123", 8) == 0);
 
     // Appending STR_NULL does nothing
-    stringAppend(&string, &STR_NULL);
+    stringAppend(&string, &STRING_NULL);
     ci_assert(string.length == 8);
 
     // ---------------- stringAppendCStr ----------------
@@ -276,7 +276,7 @@ void strTestBasic(void) {
     ci_assert(memcmp(string.data + 15, "XY", 2) == 0);
 
     // Insert with STR_NULL does nothing
-    stringInsert(&string, &STR_NULL, 0);
+    stringInsert(&string, &STRING_NULL, 0);
     ci_assert(string.length == 17);
 
     // ---------------- stringDelete ----------------
@@ -294,7 +294,7 @@ void strTestBasic(void) {
 
     // Invalid deletes do nothing
     stringDelete(&string, 5, 3);
-    stringDelete(&STR_NULL, 0, 1);
+    stringDelete(&STRING_NULL, 0, 1);
     ci_assert(string.length == 11);
 
     // ---------------- stringReplace ----------------
@@ -307,9 +307,9 @@ void strTestBasic(void) {
     }
 
     // Replace with STR_NULL or empty old does nothing
-    stringReplace(&string, &STR_NULL, &newStr);
-    stringReplace(&string, &oldStr, &STR_NULL);
-    String emptyOld = STR_NULL;
+    stringReplace(&string, &STRING_NULL, &newStr);
+    stringReplace(&string, &oldStr, &STRING_NULL);
+    String emptyOld = STRING_NULL;
     stringReplace(&string, &emptyOld, &newStr);
 
     // ---------------- stringScale ----------------
@@ -319,7 +319,7 @@ void strTestBasic(void) {
     ci_assert(memcmp(scaleStr.data, "ABABAB", 6) == 0);
 
     // Scaling STR_NULL or scaler <=1 does nothing
-    stringScale(&STR_NULL, 5);
+    stringScale(&STRING_NULL, 5);
     stringScale(&scaleStr, 1);
     ci_assert(scaleStr.length == 6);
 
@@ -339,7 +339,7 @@ void strTestSearch(void) {
     String s2 = stringCreate("World");
     String s3 = stringCreate("Hello");
     String s4 = stringCreate("oW");
-    String s5 = STR_NULL;
+    String s5 = STRING_NULL;
 
     // ---------------- stringCompare ----------------
     ci_assert(stringCompare(&s1, &s1) == 0);  // identical
@@ -357,16 +357,16 @@ void strTestSearch(void) {
     ci_assert(stringIndexOf(&s1, &s2, 0) == 5);   // "World" at index 5
     ci_assert(stringIndexOf(&s1, &s3, 0) == 0);   // "Hello" at start
     ci_assert(stringIndexOf(&s1, &s4, 0) == 4);   // "oW" at index 4
-    ci_assert(stringIndexOf(&s1, &s4, 5) == STR_NOT_FOUND); // start past match
-    ci_assert(stringIndexOf(&s1, &s5, 0) == STR_NOT_FOUND); // null search
-    ci_assert(stringIndexOf(&s5, &s2, 0) == STR_NOT_FOUND); // null string
+    ci_assert(stringIndexOf(&s1, &s4, 5) == STRING_NOT_FOUND); // start past match
+    ci_assert(stringIndexOf(&s1, &s5, 0) == STRING_NOT_FOUND); // null search
+    ci_assert(stringIndexOf(&s5, &s2, 0) == STRING_NOT_FOUND); // null string
 
     // ---------------- stringLastIndexOf ----------------
     String s6 = stringCreate("ababa");
     String sub = stringCreate("aba");
     ci_assert(stringLastIndexOf(&s6, &sub, 0) == 2); // last "aba" starts at index 2
-    ci_assert(stringLastIndexOf(&s6, &s5, 0) == STR_NOT_FOUND);
-    ci_assert(stringLastIndexOf(&s5, &sub, 0) == STR_NOT_FOUND);
+    ci_assert(stringLastIndexOf(&s6, &s5, 0) == STRING_NOT_FOUND);
+    ci_assert(stringLastIndexOf(&s5, &sub, 0) == STRING_NOT_FOUND);
 
     // ---------------- stringStartsWith ----------------
     ci_assert(stringStartsWith(&s1, &s3) == 1);   // "HelloWorld" starts with "Hello"
@@ -401,7 +401,7 @@ void strTestTransformation(void) {
     // ---------------- Setup ----------------
     String string = stringCreate("   Hello World   ");
     String emptyString = stringCreateSize(10); // initially empty buffer
-    String nullString = STR_NULL;
+    String nullString = STRING_NULL;
 
     // ---------------- stringStrip ----------------
     stringStrip(&string);
@@ -411,7 +411,7 @@ void strTestTransformation(void) {
 
     // STR_NULL and empty string
     stringStrip(&nullString);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
     stringStrip(&emptyString);
     ci_assert(emptyString.length == 0);
 
@@ -422,7 +422,7 @@ void strTestTransformation(void) {
     ci_assert(memcmp(string.data, "LeftTrim", 8) == 0);
 
     stringTrimLeft(&nullString);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- stringTrimRight ----------------
     stringFree(&string);
@@ -432,7 +432,7 @@ void strTestTransformation(void) {
     ci_assert(memcmp(string.data, "RightTrim", 9) == 0);
 
     stringTrimRight(&nullString);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- stringToUpper ----------------
     stringFree(&string);
@@ -441,21 +441,21 @@ void strTestTransformation(void) {
     ci_assert(memcmp(string.data, "ABC123 XYZ", 10) == 0);
 
     stringToUpper(&nullString);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- stringToLower ----------------
     stringToLower(&string);
     ci_assert(memcmp(string.data, "abc123 xyz", 10) == 0);
 
     stringToLower(&nullString);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- stringReverse ----------------
     stringReverse(&string);
     ci_assert(memcmp(string.data, "zyx 321cba", 10) == 0);
 
     stringReverse(&nullString);
-    ci_assert(STR_INVALID(nullString));
+    ci_assert(stringIsInvalid(nullString));
 
     // ---------------- Cleanup ----------------
     stringFree(&string);
@@ -489,15 +489,15 @@ void strTestProcessing(void) {
 
     // Empty substring
     sub = stringSubstring(&s, 3, 3);
-    ci_assert(STR_INVALID(sub));
+    ci_assert(stringIsInvalid(sub));
 
     // Out-of-bounds slice returns STR_NULL
     sub = stringSubstring(&s, 0, 100);
-    ci_assert(STR_INVALID(sub));
+    ci_assert(stringIsInvalid(sub));
 
     // STR_NULL input
-    sub = stringSubstring(&STR_NULL, 0, 1);
-    ci_assert(STR_INVALID(sub));
+    sub = stringSubstring(&STRING_NULL, 0, 1);
+    ci_assert(stringIsInvalid(sub));
 
     // ---------------- stringSplit ----------------
     StringArray arr = stringSplit(&s, &delim);
@@ -507,8 +507,8 @@ void strTestProcessing(void) {
     ci_assert(memcmp(arr.data[2].data, "Test", arr.data[2].length) == 0);
 
     // Split STR_NULL returns null array
-    StringArray nullArr = stringSplit(&STR_NULL, &delim);
-    ci_assert(STR_ARRAY_INVALID(nullArr));
+    StringArray nullArr = stringSplit(&STRING_NULL, &delim);
+    ci_assert(stringArrayIsInvalid(nullArr));
 
     stringArrayFreeDeep(&arr);
 
@@ -526,10 +526,10 @@ void strTestProcessing(void) {
 
     // Join with count 0 returns STR_NULL
     joined = stringJoin(&sep, 0);
-    ci_assert(STR_INVALID(joined));
+    ci_assert(stringIsInvalid(joined));
 
     // Join with STR_NULL separator behaves like empty separator
-    joined = stringJoin(&STR_NULL, 2, &a, &b);
+    joined = stringJoin(&STRING_NULL, 2, &a, &b);
     const char* expected2 = "OneTwo";
     ci_assert(joined.length == strlen(expected2));
     ci_assert(memcmp(joined.data, expected2, joined.length) == 0);
@@ -550,11 +550,11 @@ void strTestProcessing(void) {
     // Join empty array returns STR_NULL
     StringArray emptyArray = stringArrayCreate(0);
     joined = stringJoinArray(&sep, &emptyArray);
-    ci_assert(STR_INVALID(joined));
+    ci_assert(stringIsInvalid(joined));
 
     // Join STR_NULL array returns STR_NULL
-    joined = stringJoinArray(&sep, &STR_ARRAY_NULL);
-    ci_assert(STR_INVALID(joined));
+    joined = stringJoinArray(&sep, &STRING_ARRAY_NULL);
+    ci_assert(stringIsInvalid(joined));
 
     stringArrayFreeDeep(&joinArray);
     stringArrayFree(&emptyArray);
