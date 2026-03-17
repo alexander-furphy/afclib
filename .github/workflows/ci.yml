@@ -47,8 +47,13 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
+            # Disable leak detection to avoid 'not supported' error on macOS
+            export ASAN_OPTIONS="detect_leaks=0"
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            # MSVC ASan doesn't use LSan-style leak detection by default
             export ASAN_OPTIONS="detect_leaks=0"
           else
+            # Full leak detection on Linux
             export ASAN_OPTIONS="detect_leaks=1:exitcode=1"
           fi
           ctest --test-dir build --output-on-failure -C Debug
