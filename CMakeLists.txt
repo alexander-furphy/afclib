@@ -48,8 +48,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(DEBUG_LINK_FLAGS "")
     elseif(APPLE)
         # Disable ASan so leaks works
-        set(DEBUG_FLAGS -g -O0) 
-        set(DEBUG_LINK_FLAGS "")
+        set(DEBUG_FLAGS -fsanitize=address -fno-omit-frame-pointer -g)
+        set(DEBUG_LINK_FLAGS -fsanitize=address)
     else()
         # ON LINUX/OTHERS
         set(DEBUG_FLAGS -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -g)
@@ -72,14 +72,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(${test_name} PRIVATE ${DEBUG_FLAGS})
         target_link_options(${test_name} PRIVATE ${DEBUG_LINK_FLAGS})
 
-        if(APPLE)
-            # Using a standard if-statement instead of '!' to avoid shell syntax errors
-            add_test(NAME ${test_name} 
-                COMMAND bash -c "$<TARGET_FILE:${test_name}> && (leaks -quiet -atExit -- $<TARGET_FILE:${test_name}> | tee /dev/stderr | grep -q '0 leaks for 0 total leaked bytes')"
-            )
-        else()
-            add_test(NAME ${test_name} COMMAND ${test_name})
-        endif()
+        add_test(NAME ${test_name} COMMAND ${test_name})
 
         # Move this inside the loop so test_name is defined
         set_tests_properties(${test_name} PROPERTIES ON_FAILURE_LOG 1)

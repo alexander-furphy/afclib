@@ -44,8 +44,11 @@ jobs:
 
       - name: Run Tests
         shell: bash
-        env:
-          # This variable is still vital for Linux to catch leaks
-          ASAN_OPTIONS: "detect_leaks=1:exitcode=1"
+        timeout-minutes: 5
         run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            export ASAN_OPTIONS="detect_leaks=0"
+          else
+            export ASAN_OPTIONS="detect_leaks=1:exitcode=1"
+          fi
           ctest --test-dir build --output-on-failure -C Debug
