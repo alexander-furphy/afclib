@@ -12,7 +12,6 @@ void arrayTestLifecycle(void) {
     assert(intArray.elementSize == sizeof(int));
     assert(intArray.capacity == cap);
     assert(intArray.data != NULL);
-    assert(intArray.destructor == NULL);
 
     arrayReserve(&intArray, 20);
     assert(!arrayIsInvalid(intArray));
@@ -99,8 +98,6 @@ void intArrayDestructor(Array* array) {
 void arrayTestDestructors(void) {
     // Create a int* array with destructor
     Array intPtrArray = arrayCreate(sizeof(int*), 5);
-    arraySetDestructor(&intPtrArray, intArrayDestructor);
-    assert(intPtrArray.destructor == intArrayDestructor);
 
     // Add element
     int* element = malloc(sizeof(int));
@@ -125,6 +122,7 @@ void arrayTestDestructors(void) {
     assert(retrieved != NULL);
     assert(*retrieved == 10);
 
+    intArrayDestructor(&intPtrArray);
     arrayClear(&intPtrArray);
     arrayGet(&intPtrArray, 0, &retrieved);
     assert(retrieved == NULL);

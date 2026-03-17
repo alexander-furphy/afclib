@@ -16,7 +16,7 @@ Array arrayCreate(size_t elementSize, size_t capacity) {
         return ARRAY_NULL;
     }
 
-    return (Array){data, elementSize, capacity, NULL};
+    return (Array){data, elementSize, capacity};
 }
 
 Array arrayCopy(Array* other) {
@@ -30,19 +30,10 @@ Array arrayCopy(Array* other) {
         return ARRAY_NULL;
     }
 
-    // Set the destructor and copy the data to the new array
-    arraySetDestructor(&copy, other->destructor);
+    // Copy the data to the new array
     memcpy(copy.data, other->data, other->elementSize * other->capacity);
 
     return copy;
-}
-
-void arraySetDestructor(Array* array, ArrayDestructor destructor) {
-    if(arrayIsNull(array) || destructor == NULL) {
-        return;
-    }
-
-    array->destructor = destructor;
 }
 
 void arrayReserve(Array* array, size_t newCapacity) {
@@ -75,11 +66,6 @@ void arrayFree(Array* array) {
         return;
     }
 
-    // Call the destructor if it exists
-    if(array->destructor != NULL) {
-        array->destructor(array);
-    }
-
     // Free the actual array
     free(array->data);
     *array = ARRAY_NULL;
@@ -90,10 +76,8 @@ void arrayClear(Array* array) {
         return;
     }
 
-    // Call the array's destructor if it exists
-    if(array->destructor != NULL) {
-        array->destructor(array);
-    }
+    // Zero the memory
+    memset(array->data, 0, array->elementSize * array->capacity);
 }
 
 void arrayGet(Array* array, size_t index, void* dest) {

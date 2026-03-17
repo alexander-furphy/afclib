@@ -60,7 +60,6 @@ void intStackDestructor(Stack* stack) {
 
 void stackTestDestructors(void) {
     Stack intPtrStack = stackCreate(sizeof(int*));
-    stackSetDestructor(&intPtrStack, intStackDestructor);
 
     for(int i = 0; i < 10; i++) {
         int* data = malloc(sizeof(int));
@@ -74,6 +73,7 @@ void stackTestDestructors(void) {
     stackPeek(&intPtrStack, &top);
     assert(top != NULL && *top == 9);
 
+    intStackDestructor(&intPtrStack);
     stackFree(&intPtrStack);
 }
 

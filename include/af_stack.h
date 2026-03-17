@@ -1,3 +1,11 @@
+/*
+
+Written by Alexander Furphy.
+
+18 March 2026.
+
+*/
+
 #ifndef AF_STACK_H
 #define AF_STACK_H
 
@@ -13,15 +21,14 @@
 // ---------------- Data ----------------
 //
 
-typedef struct Stack Stack;
-
-typedef void (*StackDestructor)(Stack* stack);
-
-struct Stack {
+/// Stores a Stack data structure.
+typedef struct Stack {
     Array array;
     size_t count;
-    StackDestructor destructor;
-};
+} Stack;
+
+/// Function pointer that takes a reference to a Stack.
+typedef void (*StackFunc)(Stack* stack);
 
 //
 // ---------------- Macros and Inline Functions ----------------
@@ -54,14 +61,25 @@ static inline size_t stackCount(const Stack stack) {
 // ---------------- Functions ----------------
 //
 
+/// Create a stack with a specified element size.
 Stack stackCreate(size_t elementSize);
-void stackSetDestructor(Stack* stack, StackDestructor destructor);
+
+/// Copy a stack's data into another stack.
 Stack stackCopy(Stack* other);
+
+/// Free a stack.
 void stackFree(Stack* stack);
+
+/// Set a stack's size to zero.
 void stackClear(Stack* stack);
 
+/// Push an item to the stack.
 void stackPush(Stack* stack, void* src);
+
+/// Copy the top of the stack into another location.
 void stackPeek(Stack* stack, void* dest);
+
+/// Pop the stack (reduce count by 1).
 void stackPop(Stack* stack);
 
 #endif // AF_STACK_H

@@ -16,14 +16,6 @@ Stack stackCreate(size_t elementSize) {
     return (Stack){array, 0};
 }
 
-void stackSetDestructor(Stack* stack, StackDestructor destructor) {
-    if(stackIsNull(stack) || destructor == NULL) {
-        return;
-    }
-
-    stack->destructor = destructor;
-}
-
 Stack stackCopy(Stack* other) {
     if(stackIsNull(other)) {
         return STACK_NULL;
@@ -42,21 +34,13 @@ void stackFree(Stack* stack) {
         return;
     }
 
-    if(stack->destructor != NULL) {
-        stack->destructor(stack);
-    }
-
     arrayFree(&stack->array);
-    stack->count = 0;
+    *stack = STACK_NULL;
 }
 
 void stackClear(Stack* stack) {
     if(stackIsNull(stack)) {
         return;
-    }
-
-    if(stack->destructor != NULL) {
-        stack->destructor(stack);
     }
 
     stack->count = 0;
