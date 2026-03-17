@@ -37,9 +37,9 @@ jobs:
       - name: Sign Binaries (macOS)
         if: runner.os == 'macOS'
         run: |
-          # Use the same entitlements you use locally
+          # This matches any file in build/ that ends in _tests
           for bin in ./build/*_tests; do
-            codesign -s - --entitlements entitlements.plist --force "$bin"
+            [ -f "$bin" ] && codesign -s - --entitlements entitlements.plist --force "$bin"
           done
 
       - name: Run Tests
