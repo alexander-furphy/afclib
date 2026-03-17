@@ -47,11 +47,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(DEBUG_FLAGS /fsanitize=address /Zi /Od /RTC1-)
         set(DEBUG_LINK_FLAGS /incremental:no)
     elseif(APPLE)
-        # ON MAC: Disable ASan entirely to allow the 'leaks' tool to function
-        set(DEBUG_FLAGS -g -O0)
+        # Disable ASan so leaks works
+        set(DEBUG_FLAGS -g -O0) 
         set(DEBUG_LINK_FLAGS "")
     else()
-        # ON LINUX: Keep ASan and LeakSanitizer active
+        # ON LINUX/OTHERS
         set(DEBUG_FLAGS -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -g)
         set(DEBUG_LINK_FLAGS -fsanitize=address -fsanitize=leak)
     endif()
@@ -73,12 +73,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_link_options(${test_name} PRIVATE ${DEBUG_LINK_FLAGS})
 
         if(APPLE)
-            # Use native macOS tool for the actual test command
+            # Using a standard if-statement instead of '!' to avoid shell syntax errors
             add_test(NAME ${test_name} 
-                 COMMAND bash -c "$<TARGET_FILE:${test_name}> && leaks -quiet -atExit -- $<TARGET_FILE:${test_name}> | grep -v 'Binary Images:'"
+                COMMAND bash -c "$<TARGET_FILE:${test_name}> && (leaks -quiet -atExit -- $<TARGET_FILE:${test_name}> | tee /dev/stderr | grep -q '0 leaks for 0 total leaked bytes')"
             )
         else()
             add_test(NAME ${test_name} COMMAND ${test_name})
         endif()
+
+        # Move this inside the loop so test_name is defined
+        set_tests_properties(${test_name} PROPERTIES ON_FAILURE_LOG 1)
     endforeach()
 endif()

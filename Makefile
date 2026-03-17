@@ -21,6 +21,12 @@ build:
 debug:
 	cmake -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Debug
 	cmake --build $(BUILD_DIR)
+	@if [ "$(OS)" = "Darwin" ]; then \
+		echo "Signing with entitlements for macOS leaks tool..."; \
+		for bin in $(BUILD_DIR)/*_tests; do \
+			codesign -s - --entitlements entitlements.plist --force $$bin; \
+		done; \
+	fi
 
 # Run Tests with Verbose Output
 test: debug

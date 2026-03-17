@@ -1,6 +1,5 @@
 name: Library CI
 
-# Run CI on pushes and pull requests to main
 on:
   push:
     branches: [ main ]
@@ -15,14 +14,13 @@ jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false  # <--- ADD THIS LINE
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v3
 
-      # 2. On Windows, locate the ASan DLL and add it to the PATH
       - name: Add MSVC ASan to PATH (Windows)
         if: runner.os == 'Windows'
         run: |
@@ -31,33 +29,23 @@ jobs:
           echo "$asan_path" >> $env:GITHUB_PATH
 
       - name: Configure CMake
-        # -B build creates the build directory
-        # -DCMAKE_BUILD_TYPE=Debug ensures your ASan/Leak logic is active
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build Library and Tests
-        # --build build runs the correct compiler for the OS (gcc, clang, or msvc)
         run: cmake --build build
 
-      - name: Remove macOS Quarantine
-        if: runner.os == 'macOS'
-        run: xattr -dr com.apple.quarantine ./build/
-
-      - name: Ad-hoc Sign and Run Tests (macOS)
+      - name: Sign Binaries (macOS)
         if: runner.os == 'macOS'
         run: |
-          # Perform ad-hoc signing on the test executable
-          codesign -s - ./build/af_array_tests
-          # Run the test directly
-          ./build/af_array_tests
+          # Use the same entitlements you use locally
+          for bin in ./build/*_tests; do
+            codesign -s - --entitlements entitlements.plist --force "$bin"
+          done
 
       - name: Run Tests
         shell: bash
+        env:
+          # This variable is still vital for Linux to catch leaks
+          ASAN_OPTIONS: "detect_leaks=1:exitcode=1"
         run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            # Run the binary DIRECTLY without the 'leaks' wrapper
-            ./build/af_array_tests
-          else
-            # Linux and Windows can use ctest as normal
-            ctest --test-dir build --output-on-failure -C Debug
-          fi
+          ctest --test-dir build --output-on-failure -C Debug

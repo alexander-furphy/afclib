@@ -61,6 +61,11 @@ void arrayReserve(Array* array, size_t newCapacity) {
 
     // Copy the data into the new array
     memcpy(temp, array->data, array->capacity * array->elementSize);
+
+    // Free the old data
+    free(array->data);
+
+    // Set the array to use new data
     array->data = temp;
     array->capacity = newCapacity;
 }
