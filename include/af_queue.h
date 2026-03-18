@@ -1,3 +1,11 @@
+/*
+
+Written by Alexander Furphy.
+
+18 March 2026.
+
+*/
+
 #ifndef AF_QUEUE_H
 #define AF_QUEUE_H
 
