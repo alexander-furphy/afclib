@@ -87,6 +87,7 @@ void stackTestCopy(void) {
     Stack copy = stackCopy(&stack);
     assert(!stackIsInvalid(copy));
     assert(stackCount(copy) == 10);
+    assert(copy.array.capacity == 10);
 
     stackFree(&stack);
     stackFree(&copy);

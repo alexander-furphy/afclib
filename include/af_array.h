@@ -76,6 +76,9 @@ Array arrayCreate(size_t elementSize, size_t capacity);
 /// Deeply copy the data of a pre existing array into a new array.
 Array arrayCopy(Array* other);
 
+/// Copy a range of elements into a new array. Index B is exclusive.
+Array arrayCopyRange(Array* other, size_t indexA, size_t indexB);
+
 /// Reallocate the array if it is below new capacity.
 /// Array will be freed and set to null if the operation fails.
 void arrayReserve(Array* array, size_t newCapacity);

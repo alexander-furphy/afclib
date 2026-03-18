@@ -21,7 +21,13 @@ Stack stackCopy(Stack* other) {
         return STACK_NULL;
     }
 
-    Array copy = arrayCopy(&other->array);
+    // Create a new stack if the count is 0
+    if(other->count == 0) {
+        return stackCreate(other->array.elementSize);
+    }
+
+    // Copy the range of
+    Array copy = arrayCopyRange(&other->array, 0, other->count);
     if(arrayIsInvalid(copy)) {
         return STACK_NULL;
     }

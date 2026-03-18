@@ -156,6 +156,29 @@ void arrayTestCopy(void) {
     arrayFree(&copy);
 }
 
+void arrayTestCopyRange(void) {
+    size_t capacity = 5;
+    Array array = arrayCreate(sizeof(int), capacity);
+    for(int i = 0; i < (int)capacity; i++) {
+        arraySet(&array, i, &i);
+    }
+
+    Array copy = arrayCopyRange(&array, 1, 4);
+    int item;
+    arrayGet(&array, 0, &item);
+    assert(item == 1);
+    arrayGet(&array, 1, &item);
+    assert(item == 2);
+    arrayGet(&array, 2, &item);
+    assert(item == 3);
+
+    Array illegalCopy = arrayCopyRange(&array, 4, 3);
+    illegalCopy = arrayCopyRange(&array, 50, 60);
+
+    arrayFree(&array);
+    arrayFree(&copy);
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 

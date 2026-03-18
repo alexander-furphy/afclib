@@ -36,6 +36,34 @@ Array arrayCopy(Array* other) {
     return copy;
 }
 
+Array arrayCopyRange(Array* other, size_t indexA, size_t indexB) {
+    if(arrayIsNull(other)) {
+        return ARRAY_NULL;
+    }
+
+    // Invalid indices checks
+    if(indexA >= other->capacity || indexB >= other->capacity || indexA >= indexB) {
+        return ARRAY_NULL;
+    }
+
+    size_t elements = indexB - indexA;
+
+    // Create a new array of the required size
+    Array copy = arrayCreate(other->elementSize, elements);
+    if(arrayIsInvalid(copy)) {
+        return ARRAY_NULL;
+    }
+
+    // Copy the data to the new array, starting at an offset
+    memcpy(
+        copy.data, 
+        other->data + (other->elementSize * indexA), 
+        other->elementSize * elements
+    );
+
+    return copy;
+}
+
 void arrayReserve(Array* array, size_t newCapacity) {
     if(arrayIsNull(array) || newCapacity <= array->capacity) {
         return;
