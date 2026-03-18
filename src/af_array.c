@@ -57,7 +57,7 @@ Array arrayCopyRange(Array* other, size_t indexA, size_t indexB) {
     // Copy the data to the new array, starting at an offset
     memcpy(
         copy.data, 
-        other->data + (other->elementSize * indexA), 
+        (char*)other->data + (other->elementSize * indexA), 
         other->elementSize * elements
     );
 
