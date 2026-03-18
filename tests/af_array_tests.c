@@ -151,6 +151,12 @@ void arrayTestCopy(void) {
         assert(retrieved == i);
     }
 
+    // Test copy element
+    arrayCopyElement(&array, &copy, 2, 4);
+    int val;
+    arrayGet(&copy, 4, &val);
+    assert(val == 2);
+
     arrayFree(&array);
     assert(!arrayIsInvalid(copy));
     arrayFree(&copy);

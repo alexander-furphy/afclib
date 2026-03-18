@@ -52,16 +52,29 @@ void stackClear(Stack* stack) {
     stack->count = 0;
 }
 
+static bool stackResize(Stack* stack) {
+    if(stackIsNull(stack)) {
+        return false;
+    }
+
+    arrayReserve(&stack->array, stack->array.capacity * STACK_GROWTH_FACTOR);
+
+    if(arrayIsInvalid(stack->array)) {
+        *stack = STACK_NULL;
+        return false;
+    }
+
+    return true;
+}
+
 void stackPush(Stack* stack, void* src) {
     if(stackIsNull(stack) || src == NULL) {
         return;
     }
 
     if(stack->count >= stack->array.capacity) {
-        arrayReserve(&stack->array, stack->array.capacity * STACK_GROWTH_FACTOR);
-
-        if(arrayIsInvalid(stack->array)) {
-            *stack = STACK_NULL;
+        bool success = stackResize(stack);
+        if(!success) {
             return;
         }
     }

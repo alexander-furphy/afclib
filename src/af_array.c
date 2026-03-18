@@ -3,7 +3,7 @@
 #include <string.h>
 
 /// Calculates the pointer to a specific index of an array.
-#define ARRAY_INDEX(a, i) ((char*)(a)->data + ((i) * array->elementSize))
+#define ARRAY_INDEX(a, i) ((char*)(a)->data + ((i) * (a)->elementSize))
 
 Array arrayCreate(size_t elementSize, size_t capacity) {
     if(elementSize == 0 || capacity == 0) {
@@ -64,6 +64,18 @@ Array arrayCopyRange(Array* other, size_t indexA, size_t indexB) {
     return copy;
 }
 
+void arrayCopyElement(const Array* source, Array* dest, size_t from, size_t to) {
+    bool invalid = arrayIsNull(source) || arrayIsNull(dest) ||
+       from >= source->capacity || to >= dest->capacity ||
+       source->elementSize != dest->elementSize;
+
+    if(invalid) {
+        return;
+    }
+
+    memcpy(ARRAY_INDEX(dest, to), ARRAY_INDEX(source, from), source->elementSize);
+}
+
 void arrayReserve(Array* array, size_t newCapacity) {
     if(arrayIsNull(array) || newCapacity <= array->capacity) {
         return;
@@ -108,7 +120,7 @@ void arrayClear(Array* array) {
     memset(array->data, 0, array->elementSize * array->capacity);
 }
 
-void arrayGet(Array* array, size_t index, void* dest) {
+void arrayGet(const Array* array, size_t index, void* dest) {
     // Bounds and null check
     if(arrayIsNull(array) || index >= array->capacity || dest == NULL) {
         return;
