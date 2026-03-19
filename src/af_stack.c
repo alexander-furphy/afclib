@@ -71,14 +71,8 @@ static bool stackResize(Stack* stack) {
         return false;
     }
 
-    arrayReserve(&stack->array, stack->array.capacity * STACK_GROWTH_FACTOR);
-
-    if(arrayIsInvalid(&stack->array)) {
-        *stack = STACK_NULL;
-        return false;
-    }
-
-    return true;
+    // Array reserve returns false on failure
+    return arrayReserve(&stack->array, stack->array.capacity * STACK_GROWTH_FACTOR);
 }
 
 void stackPush(Stack* stack, void* src) {

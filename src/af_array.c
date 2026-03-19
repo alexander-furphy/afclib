@@ -80,18 +80,15 @@ void arrayCopyElement(const Array* source, Array* dest, size_t from, size_t to) 
     memcpy(ARRAY_INDEX(dest, to), ARRAY_INDEX(source, from), source->elementSize);
 }
 
-void arrayReserve(Array* array, size_t newCapacity) {
+bool arrayReserve(Array* array, size_t newCapacity) {
     if(arrayIsInvalid(array) || newCapacity <= array->capacity) {
-        return;
+        return false;
     }
 
     // Allocate and validate a new block of memory.
     void* temp = calloc(newCapacity, array->elementSize);
     if(temp == NULL) {
-        // Free and null the old data on failure.
-        arrayFree(array);
-        *array = ARRAY_NULL;
-        return;
+        return false;
     }
 
     // Copy the data into the new array
@@ -103,6 +100,8 @@ void arrayReserve(Array* array, size_t newCapacity) {
     // Set the array to use new data
     array->data = temp;
     array->capacity = newCapacity;
+
+    return true;
 }
 
 void arrayFree(Array* array) {

@@ -128,14 +128,15 @@ String stringCopy(const String* other) {
     return (String){data, other->length, other->length};
 }
 
-void stringReserve(String* string, const size_t size) {
+bool stringReserve(String* string, const size_t size) {
     if(stringIsInvalid(string)) {
-        return;
+        return false;
     }
 
     // Don't allocate if the string buffer is already at the minimum size.
+    // However, return true because the string is in a stable state.
     if(string->capacity >= size) {
-        return;
+        return true;
     }
 
     // Reallocate into a new pointer
@@ -143,22 +144,21 @@ void stringReserve(String* string, const size_t size) {
 
     // If the reallocation failed, free the original
     if(temp == NULL) {
-        stringFree(string);
-        *string = STRING_NULL;
+        return false;
     }
-    else {
-        string->data = temp;
-        string->capacity = size;
-    }
+
+    string->data = temp;
+    string->capacity = size;
+    return true;
 }
 
 void stringClear(String* string) {
     string->length = 0;
 }
 
-void stringShrinkBuffer(String* string) {
+bool stringShrinkBuffer(String* string) {
     if(stringIsInvalid(string)) {
-        return;
+        return false;
     }
 
     // Reallocate into a new pointer
@@ -166,13 +166,12 @@ void stringShrinkBuffer(String* string) {
 
     // If the reallocation failed, free the original
     if(temp == NULL) {
-        stringFree(string);
-        *string = STRING_NULL;
+        return false;
     }
-    else {
-        string->data = temp;
-        string->capacity = string->length;
-    }
+
+    string->data = temp;
+    string->capacity = string->length;
+    return true;
 }
 
 //
@@ -266,7 +265,10 @@ void stringSetFormat(String* string, const char* format, ...) {
         return;
     }
 
-    stringReserve(string, length + 1);
+    bool success = stringReserve(string, length + 1);
+    if(!success) {
+        return;
+    }
 
     // Write the data to the string.
     vsnprintf(string->data, (size_t)length + 1, format, args);
@@ -307,7 +309,10 @@ void stringAppend(String* dest, const String* other) {
     size_t requiredLength = dest->length + other->length;
 
     // Resize if needed
-    stringReserve(dest, requiredLength);
+    bool success = stringReserve(dest, requiredLength);
+    if(!success) {
+        return;
+    }
 
     // Copy the data to the end of the destination
     memcpy(&(dest->data[dest->length]), other->data, other->length);
@@ -321,7 +326,10 @@ void stringInsert(String* string, const String* toInsert, const size_t index) {
 
     // Calculate the required length
     size_t requiredLength = string->length + toInsert->length;
-    stringReserve(string, requiredLength);
+    bool success = stringReserve(string, requiredLength);
+    if(!success) {
+        return;
+    }
 
     // Calculate the destionation and copy size
     size_t dest = index + toInsert->length;
@@ -374,7 +382,10 @@ void stringReplace(String* string, const String* old, const String* new) {
         size_t suffixLength = string->length - suffixStart;
 
         // Resize if required
-        stringReserve(string, string->length + lengthDiff);
+        bool success = stringReserve(string, string->length + lengthDiff);
+        if(!success) {
+            return;
+        }
 
         // Don't move if suffix is of length 0
         if(suffixLength > 0) {
@@ -405,7 +416,10 @@ void stringScale(String* string, const int scaler) {
     size_t originalLength = string->length;
     size_t requiredLength = string->length * scaler;
 
-    stringReserve(string, requiredLength);
+    bool success = stringReserve(string, requiredLength);
+    if(!success) {
+        return;
+    }
 
     // Repetively double the string until it no longer fits into a power of two.
     size_t currentLength = originalLength;
@@ -801,7 +815,10 @@ void stringSetCStr(String* string, const char* value) {
     }
 
     size_t length = strlen(value);
-    stringReserve(string, length);
+    bool success = stringReserve(string, length);
+    if(!success) {
+        return;
+    }
 
     // Copy the data into the string.
     memcpy(string->data, value, length);
@@ -815,7 +832,10 @@ void stringAppendCStr(String* dest, const char* value) {
 
     size_t valueLength = strlen(value);
     size_t requiredLength = dest->length + valueLength;
-    stringReserve(dest, requiredLength);
+    bool success = stringReserve(dest, requiredLength);
+    if(!success) {
+        return;
+    }
 
     // Copy the memory to the end of the destination
     memcpy(&(dest->data[dest->length]), value, valueLength);

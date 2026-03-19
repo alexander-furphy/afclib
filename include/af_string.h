@@ -107,16 +107,17 @@ void stringFree(String* string);
 String stringCopy(const String* other);
 
 /// Reallocate the string to specified if it is below the specified size.
-/// If the reallocation fails, the original string will be freed and set to null.
-void stringReserve(String* string, const size_t size);
+/// Preserves the original and returns false if allocation fails.
+bool stringReserve(String* string, const size_t size);
 
 /// Clear the string, without freeing the buffer.
 /// Identical to writing string.length = 0.
 void stringClear(String* string);
 
 /// Reallocate a string to it's length, discarding the buffer.
-/// If the reallocation fails, the original string will be freed and set to null.
-void stringShrinkBuffer(String* string);
+/// If the reallocation fails, the original string will remain
+/// and the function will return false
+bool stringShrinkBuffer(String* string);
 
 //
 // ---------------- Formatting and IO ----------------

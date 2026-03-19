@@ -2,11 +2,10 @@
 
 -------------------------------- Memory Model --------------------------------
 
-Arrays store an internal element size and capacity, as well as an optional
-destructor for use with collections that require memory cleanup. Items are
+Arrays store an internal element size and capacity. Items are
 set by copying data into the array, and read by copying data from the array
 into another memory location. All array data is initialised to zero on
-creating, to add safety with the use of destructors and copying.
+creating, to add safety with the use of custom destructors and copying.
 
 -------------------------------- Important --------------------------------
 
@@ -76,8 +75,8 @@ Array arrayCopyRange(Array* other, size_t indexA, size_t indexB);
 void arrayCopyElement(const Array* source, Array* dest, size_t from, size_t to);
 
 /// Reallocate the array if it is below new capacity.
-/// Array will be freed and set to null if the operation fails.
-void arrayReserve(Array* array, size_t newCapacity);
+/// Array will stay the same and return false if this operation fails.
+bool arrayReserve(Array* array, size_t newCapacity);
 
 /// Free an array.
 void arrayFree(Array* array);
