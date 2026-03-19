@@ -6,12 +6,12 @@
 
 void stackTestLifecycle(void) {
     Stack byteStack = stackCreate(sizeof(uint8_t));
-    assert(!stackIsInvalid(byteStack));
+    assert(!stackIsInvalid(&byteStack));
     assert(byteStack.count == 0);
     assert(byteStack.array.elementSize == sizeof(uint8_t));
 
     stackFree(&byteStack);
-    assert(stackIsInvalid(byteStack));
+    assert(stackIsInvalid(&byteStack));
 }
 
 void stackTestBasic(void) {
@@ -41,7 +41,7 @@ void stackTestBasic(void) {
     for(int i = 0; i < 32; i++) {
         stackPush(&shortStack, &num);
     }
-    assert(!stackIsInvalid(shortStack));
+    assert(!stackIsInvalid(&shortStack));
     assert(stackCount(shortStack) == 32);
 
     stackFree(&shortStack);
@@ -85,7 +85,7 @@ void stackTestCopy(void) {
     }
 
     Stack copy = stackCopy(&stack);
-    assert(!stackIsInvalid(copy));
+    assert(!stackIsInvalid(&copy));
     assert(stackCount(copy) == 10);
     assert(copy.array.capacity == 10);
 

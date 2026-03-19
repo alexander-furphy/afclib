@@ -29,19 +29,12 @@ typedef size_t ListIterator;
 /// Represents a null/invalid List
 #define LIST_NULL ((List){0})
 
-/// Check to see if a List is invalid.
-static inline bool listIsInvalid(const List list) {
-    return arrayIsInvalid(list.array) || list.count >= list.array.capacity;
-}
-
-/// Check to see if a List reference is null, or the List within it is invalid.
-static inline bool listIsNull(const List* list) {
-    return list == NULL || listIsInvalid(*list);
-}
-
 //
 // ---------------- Functions ----------------
 //
+
+/// Check to see if a List reference is null, or the List within it is invalid.
+bool listIsInvalid(const List* list);
 
 /// Create a list with a specified element size.
 List listCreate(size_t elementSize);

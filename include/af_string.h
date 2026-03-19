@@ -67,31 +67,12 @@ typedef struct StringArray {
 /// Code for not found. Used for seaching functions such as indexOf.
 #define STRING_NOT_FOUND ((size_t)-1)
 
-/// Boolean check to see if a string is valid.
-/// Does not work for string pointers.
-static inline bool stringIsInvalid(const String string) {
-    return string.data == NULL;
-}
-
-/// Null check for a string pointer.
-static inline bool stringIsNull(const String* string) {
-    return string == NULL || string->data == NULL;
-}
-
-/// Boolean check to see if a string array is valid.
-/// Does not work for string array pointers.
-static inline bool stringArrayIsInvalid(const StringArray array) {
-    return array.data == NULL;
-}
-
-/// Null check for a string array pointer.
-static inline bool stringArrayIsNull(const StringArray* array) {
-    return array == NULL || array->data == NULL;
-}
-
 //
 // ---------------- String Array Functions ----------------
 //
+
+/// Null check for a string array pointer.
+bool stringArrayIsInvalid(const StringArray* array);
 
 /// Allocate a new string array with a specified number of elements.
 /// All elements are initialised to 0.
@@ -107,6 +88,9 @@ void stringArrayFreeDeep(StringArray* array);
 //
 // ---------------- Lifetime and Memory Management ----------------
 //
+
+/// Null check for a string pointer.
+bool stringIsInvalid(const String* string);
 
 /// Allocate a new string and copies the character array into it.
 /// Will not allocate values 0 bytes in length.

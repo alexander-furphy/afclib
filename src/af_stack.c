@@ -3,13 +3,27 @@
 #define STACK_INITIAL_SIZE 4
 #define STACK_GROWTH_FACTOR 2
 
+bool stackIsInvalid(const Stack* stack) {
+    return stack == NULL ||
+           stack->count > stack->array.capacity ||
+           arrayIsInvalid(&stack->array);
+}
+
+bool stackIsEmpty(const Stack stack) {
+    return stack.count == 0;
+}
+
+size_t stackCount(const Stack stack) {
+    return stack.count;
+}
+
 Stack stackCreate(size_t elementSize) {
     if(elementSize == 0) {
         return STACK_NULL;
     }
 
     Array array = arrayCreate(elementSize, STACK_INITIAL_SIZE);
-    if(arrayIsInvalid(array)) {
+    if(arrayIsInvalid(&array)) {
         return STACK_NULL;
     }
 
@@ -17,7 +31,7 @@ Stack stackCreate(size_t elementSize) {
 }
 
 Stack stackCopy(Stack* other) {
-    if(stackIsNull(other)) {
+    if(stackIsInvalid(other)) {
         return STACK_NULL;
     }
 
@@ -28,7 +42,7 @@ Stack stackCopy(Stack* other) {
 
     // Copy the range of
     Array copy = arrayCopyRange(&other->array, 0, other->count);
-    if(arrayIsInvalid(copy)) {
+    if(arrayIsInvalid(&copy)) {
         return STACK_NULL;
     }
 
@@ -36,7 +50,7 @@ Stack stackCopy(Stack* other) {
 }
 
 void stackFree(Stack* stack) {
-    if(stackIsNull(stack)) {
+    if(stackIsInvalid(stack)) {
         return;
     }
 
@@ -45,7 +59,7 @@ void stackFree(Stack* stack) {
 }
 
 void stackClear(Stack* stack) {
-    if(stackIsNull(stack)) {
+    if(stackIsInvalid(stack)) {
         return;
     }
 
@@ -53,13 +67,13 @@ void stackClear(Stack* stack) {
 }
 
 static bool stackResize(Stack* stack) {
-    if(stackIsNull(stack)) {
+    if(stackIsInvalid(stack)) {
         return false;
     }
 
     arrayReserve(&stack->array, stack->array.capacity * STACK_GROWTH_FACTOR);
 
-    if(arrayIsInvalid(stack->array)) {
+    if(arrayIsInvalid(&stack->array)) {
         *stack = STACK_NULL;
         return false;
     }
@@ -68,7 +82,7 @@ static bool stackResize(Stack* stack) {
 }
 
 void stackPush(Stack* stack, void* src) {
-    if(stackIsNull(stack) || src == NULL) {
+    if(stackIsInvalid(stack) || src == NULL) {
         return;
     }
 
@@ -83,7 +97,7 @@ void stackPush(Stack* stack, void* src) {
 }
 
 void stackPeek(Stack* stack, void* dest) {
-    if(stackIsNull(stack) || stack->count == 0 || dest == NULL) {
+    if(stackIsInvalid(stack) || stack->count == 0 || dest == NULL) {
         return;
     }
 
@@ -91,7 +105,7 @@ void stackPeek(Stack* stack, void* dest) {
 }
 
 void stackPop(Stack* stack) {
-    if(stackIsNull(stack)) {
+    if(stackIsInvalid(stack)) {
         return;
     }
 

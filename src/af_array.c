@@ -5,6 +5,10 @@
 /// Calculates the pointer to a specific index of an array.
 #define ARRAY_INDEX(a, i) ((char*)(a)->data + ((i) * (a)->elementSize))
 
+bool arrayIsInvalid(const Array* array) {
+    return array == NULL || array->data == NULL;
+}
+
 Array arrayCreate(size_t elementSize, size_t capacity) {
     if(elementSize == 0 || capacity == 0) {
         return ARRAY_NULL;
@@ -20,13 +24,13 @@ Array arrayCreate(size_t elementSize, size_t capacity) {
 }
 
 Array arrayCopy(Array* other) {
-    if(arrayIsNull(other)) {
+    if(arrayIsInvalid(other)) {
         return ARRAY_NULL;
     }
 
     // Create a new array of the required size
     Array copy = arrayCreate(other->elementSize, other->capacity);
-    if(arrayIsInvalid(copy)) {
+    if(arrayIsInvalid(&copy)) {
         return ARRAY_NULL;
     }
 
@@ -37,7 +41,7 @@ Array arrayCopy(Array* other) {
 }
 
 Array arrayCopyRange(Array* other, size_t indexA, size_t indexB) {
-    if(arrayIsNull(other)) {
+    if(arrayIsInvalid(other)) {
         return ARRAY_NULL;
     }
 
@@ -50,7 +54,7 @@ Array arrayCopyRange(Array* other, size_t indexA, size_t indexB) {
 
     // Create a new array of the required size
     Array copy = arrayCreate(other->elementSize, elements);
-    if(arrayIsInvalid(copy)) {
+    if(arrayIsInvalid(&copy)) {
         return ARRAY_NULL;
     }
 
@@ -65,7 +69,7 @@ Array arrayCopyRange(Array* other, size_t indexA, size_t indexB) {
 }
 
 void arrayCopyElement(const Array* source, Array* dest, size_t from, size_t to) {
-    bool invalid = arrayIsNull(source) || arrayIsNull(dest) ||
+    bool invalid = arrayIsInvalid(source) || arrayIsInvalid(dest) ||
        from >= source->capacity || to >= dest->capacity ||
        source->elementSize != dest->elementSize;
 
@@ -77,7 +81,7 @@ void arrayCopyElement(const Array* source, Array* dest, size_t from, size_t to) 
 }
 
 void arrayReserve(Array* array, size_t newCapacity) {
-    if(arrayIsNull(array) || newCapacity <= array->capacity) {
+    if(arrayIsInvalid(array) || newCapacity <= array->capacity) {
         return;
     }
 
@@ -102,7 +106,7 @@ void arrayReserve(Array* array, size_t newCapacity) {
 }
 
 void arrayFree(Array* array) {
-    if(arrayIsNull(array)) {
+    if(arrayIsInvalid(array)) {
         return;
     }
 
@@ -112,7 +116,7 @@ void arrayFree(Array* array) {
 }
 
 void arrayClear(Array* array) {
-    if(arrayIsNull(array)) {
+    if(arrayIsInvalid(array)) {
         return;
     }
 
@@ -122,7 +126,7 @@ void arrayClear(Array* array) {
 
 void arrayGet(const Array* array, size_t index, void* dest) {
     // Bounds and null check
-    if(arrayIsNull(array) || index >= array->capacity || dest == NULL) {
+    if(arrayIsInvalid(array) || index >= array->capacity || dest == NULL) {
         return;
     }
 
@@ -132,7 +136,7 @@ void arrayGet(const Array* array, size_t index, void* dest) {
 
 void arraySet(Array* array, size_t index, void* src) {
     // Bounds and null check
-    if(arrayIsNull(array) || index >= array->capacity || src == NULL) {
+    if(arrayIsInvalid(array) || index >= array->capacity || src == NULL) {
         return;
     }
 

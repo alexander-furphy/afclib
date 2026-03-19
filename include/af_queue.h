@@ -39,21 +39,12 @@ typedef void (*QueueFunc)(Queue*);
 /// Represents a null/invalid Queue
 #define QUEUE_NULL ((Queue){0})
 
-/// Check to see if a Queue is invalid.
-static inline bool queueIsInvalid(const Queue queue) {
-    return arrayIsInvalid(queue.array) || 
-        queue.ptrFront >= queue.array.capacity || 
-        queue.ptrRear >= queue.array.capacity;
-}
-
-/// Check to see if a Queue reference is null, or the Queue within it is invalid.
-static inline bool queueIsNull(const Queue* queue) {
-    return queue == NULL || queueIsInvalid(*queue);
-}
-
 //
 // ---------------- Functions ----------------
 //
+
+/// Check to see if a Queue reference is null, or the Queue within it is invalid.
+bool queueIsInvalid(const Queue* queue);
 
 /// Create a queue with a specified element size.
 Queue queueCreate(size_t elementSize);

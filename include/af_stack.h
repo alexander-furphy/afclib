@@ -37,29 +37,18 @@ typedef void (*StackFunc)(Stack* stack);
 /// Represents a null string.
 #define STACK_NULL ((Stack){0})
 
-/// Boolean check to see if a stack is invalid.
-static inline bool stackIsInvalid(const Stack stack) {
-    return arrayIsInvalid(stack.array);
-}
-
-/// Boolean check to see if a stack pointer or the data inside it is invalid.
-static inline bool stackIsNull(const Stack* stack) {
-    return stack == NULL || stackIsInvalid(*stack);
-}
-
-/// Tests if a stack is empty.
-static inline bool stackIsEmpty(const Stack stack) {
-    return stack.count == 0;
-}
-
-/// Get the size of a stack.
-static inline size_t stackCount(const Stack stack) {
-    return stack.count;
-}
-
 //
 // ---------------- Functions ----------------
 //
+
+/// Boolean check to see if a stack pointer or the data inside it is invalid.
+bool stackIsInvalid(const Stack* stack);
+
+/// Tests if a stack is empty.
+bool stackIsEmpty(const Stack stack);
+
+/// Get the size of a stack.
+size_t stackCount(const Stack stack);
 
 /// Create a stack with a specified element size.
 Stack stackCreate(size_t elementSize);

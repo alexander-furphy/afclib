@@ -9,7 +9,7 @@ void queueTestLifecycle(void) {
     assert(queueIsEmpty(&intQueue));
     
     queueFree(&intQueue);
-    assert(queueIsInvalid(intQueue));
+    assert(queueIsInvalid(&intQueue));
 }
 
 void queueTestBasic(void) {
@@ -50,7 +50,7 @@ void queueTestCopy(void) {
     }
 
     Queue copy = queueCopy(&intQueue);
-    assert(!queueIsInvalid(copy));
+    assert(!queueIsInvalid(&copy));
 
     for(int i = 0; i < 16; i++) {
         int val;

@@ -3,13 +3,20 @@
 #define QUEUE_INITIAL_SIZE 4
 #define QUEUE_RESIZE_FACTOR 2
 
+bool queueIsInvalid(const Queue* queue) {
+    return queue == NULL ||
+           arrayIsInvalid(&queue->array) || 
+           queue->ptrFront >= queue->array.capacity || 
+           queue->ptrRear >= queue->array.capacity;
+}
+
 Queue queueCreate(size_t elementSize) {
     if(elementSize == 0) {
         return QUEUE_NULL;
     }
 
     Array array = arrayCreate(elementSize, QUEUE_INITIAL_SIZE);
-    if(arrayIsInvalid(array)) {
+    if(arrayIsInvalid(&array)) {
         return QUEUE_NULL;
     }
 
@@ -17,7 +24,7 @@ Queue queueCreate(size_t elementSize) {
 }
 
 static Array queueCopyToArray(Queue* queue) {
-    if(queueIsNull(queue) || queueIsEmpty(queue)) {
+    if(queueIsInvalid(queue) || queueIsEmpty(queue)) {
         return ARRAY_NULL;
     }
 
@@ -26,7 +33,7 @@ static Array queueCopyToArray(Queue* queue) {
         queue->array.capacity * QUEUE_RESIZE_FACTOR
     );
 
-    if(arrayIsInvalid(copy)) {
+    if(arrayIsInvalid(&copy)) {
         return ARRAY_NULL;
     }
 
@@ -38,12 +45,12 @@ static Array queueCopyToArray(Queue* queue) {
 }
 
 Queue queueCopy(Queue* src) {
-    if(queueIsNull(src)) {
+    if(queueIsInvalid(src)) {
         return QUEUE_NULL;
     }
 
     Array copy = queueCopyToArray(src);
-    if(arrayIsInvalid(copy)) {
+    if(arrayIsInvalid(&copy)) {
         return QUEUE_NULL;
     }
 
@@ -51,7 +58,7 @@ Queue queueCopy(Queue* src) {
 }
 
 void queueFree(Queue* queue) {
-    if(queueIsNull(queue)) {
+    if(queueIsInvalid(queue)) {
         return;
     }
 
@@ -60,7 +67,7 @@ void queueFree(Queue* queue) {
 }
 
 void queueClear(Queue* queue) {
-    if(queueIsNull(queue)) {
+    if(queueIsInvalid(queue)) {
         return;
     }
 
@@ -70,12 +77,12 @@ void queueClear(Queue* queue) {
 }
 
 static bool queueResize(Queue* queue) {
-    if(queueIsNull(queue)) {
+    if(queueIsInvalid(queue)) {
         return false;
     }
 
     Array new = queueCopyToArray(queue);
-    if(arrayIsInvalid(new)) {
+    if(arrayIsInvalid(&new)) {
         return false;
     }
 
@@ -90,7 +97,7 @@ static bool queueResize(Queue* queue) {
 }
 
 void queuePush(Queue* queue, void* src) {
-    if(queueIsNull(queue) || src == NULL) {
+    if(queueIsInvalid(queue) || src == NULL) {
         return;
     }
 
@@ -111,7 +118,7 @@ void queuePush(Queue* queue, void* src) {
 }
 
 void queuePeek(const Queue* queue, void* dest) {
-    if(queueIsNull(queue) || queueIsEmpty(queue) || dest == NULL) {
+    if(queueIsInvalid(queue) || queueIsEmpty(queue) || dest == NULL) {
         return;
     }
 
@@ -120,7 +127,7 @@ void queuePeek(const Queue* queue, void* dest) {
 }
 
 void queuePop(Queue* queue) {
-    if(queueIsNull(queue) || queueIsEmpty(queue)) {
+    if(queueIsInvalid(queue) || queueIsEmpty(queue)) {
         return;
     }
 
@@ -134,7 +141,7 @@ bool queueIsEmpty(const Queue* queue) {
 }
 
 size_t queueCount(const Queue* queue) {
-    if(queueIsNull(queue)) {
+    if(queueIsInvalid(queue)) {
         return 0;
     }
 

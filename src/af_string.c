@@ -14,6 +14,10 @@
 // ---------------- String Array Functions ----------------
 //
 
+bool stringArrayIsInvalid(const StringArray* array) {
+    return array == NULL || array->data == NULL;
+}
+
 StringArray stringArrayCreate(const size_t length) {
     if(length == 0) {
         return STRING_ARRAY_NULL;
@@ -30,7 +34,7 @@ StringArray stringArrayCreate(const size_t length) {
 }
 
 void stringArrayFree(StringArray* array) {
-    if(stringArrayIsNull(array)) {
+    if(stringArrayIsInvalid(array)) {
         return;
     }
 
@@ -40,7 +44,7 @@ void stringArrayFree(StringArray* array) {
 }
 
 void stringArrayFreeDeep(StringArray* array) {
-    if(stringArrayIsNull(array)) {
+    if(stringArrayIsInvalid(array)) {
         return;
     }
 
@@ -56,6 +60,10 @@ void stringArrayFreeDeep(StringArray* array) {
 // ---------------- Lifetime Functions ----------------
 //
 
+bool stringIsInvalid(const String* string) {
+    return string == NULL || string->data == NULL || string->length > string->capacity;
+}
+
 String stringCreate(const char* value) {
     if(value == NULL) {
         return STRING_NULL;
@@ -70,7 +78,7 @@ String stringCreate(const char* value) {
 
     String string = stringCreateSize(length);
 
-    if(stringIsInvalid(string)) {
+    if(stringIsInvalid(&string)) {
         return STRING_NULL;
     }
 
@@ -96,7 +104,7 @@ String stringCreateSize(const size_t size) {
 }
 
 void stringFree(String* string) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -105,7 +113,7 @@ void stringFree(String* string) {
 }
 
 String stringCopy(const String* other) {
-    if(stringIsNull(other)) {
+    if(stringIsInvalid(other)) {
         return STRING_NULL;
     }
 
@@ -121,7 +129,7 @@ String stringCopy(const String* other) {
 }
 
 void stringReserve(String* string, const size_t size) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -149,7 +157,7 @@ void stringClear(String* string) {
 }
 
 void stringShrinkBuffer(String* string) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -200,7 +208,7 @@ String stringReadFile(const char* path) {
 }
 
 void fStringLog(const String* string, FILE* stream) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -220,7 +228,7 @@ void fStringLog(const String* string, FILE* stream) {
 }
 
 void fStringPrint(const String* string, FILE* stream) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -238,7 +246,7 @@ void stringPrint(const String* string) {
 }
 
 void stringSetFormat(String* string, const char* format, ...) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -268,7 +276,7 @@ void stringSetFormat(String* string, const char* format, ...) {
 }
 
 char* stringGetCString(const String* string) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return NULL;
     }
 
@@ -292,7 +300,7 @@ char* stringGetCString(const String* string) {
 //
 
 void stringAppend(String* dest, const String* other) {
-    if(stringIsNull(dest) || stringIsNull(other)) {
+    if(stringIsInvalid(dest) || stringIsInvalid(other)) {
         return;
     }
 
@@ -307,7 +315,7 @@ void stringAppend(String* dest, const String* other) {
 }
 
 void stringInsert(String* string, const String* toInsert, const size_t index) {
-    if(stringIsNull(string) || stringIsNull(toInsert) || index > string->length) {
+    if(stringIsInvalid(string) || stringIsInvalid(toInsert) || index > string->length) {
         return;
     }
 
@@ -329,7 +337,7 @@ void stringInsert(String* string, const String* toInsert, const size_t index) {
 }
 
 void stringDelete(String* string, const size_t start, const size_t end) {
-    if(stringIsNull(string) || start > string->length || end > string->length || start > end) {
+    if(stringIsInvalid(string) || start > string->length || end > string->length || start > end) {
         return;
     }
 
@@ -343,7 +351,7 @@ void stringDelete(String* string, const size_t start, const size_t end) {
 
 void stringReplace(String* string, const String* old, const String* new) {
     // Return if any string is null or the old is 0
-    if(stringIsNull(string) || stringIsNull(old) || stringIsNull(new) || old->length == 0) {
+    if(stringIsInvalid(string) || stringIsInvalid(old) || stringIsInvalid(new) || old->length == 0) {
         return;
     }
 
@@ -390,7 +398,7 @@ void stringReplace(String* string, const String* old, const String* new) {
 }
 
 void stringScale(String* string, const int scaler) {
-    if(stringIsNull(string) || scaler <= 1) {
+    if(stringIsInvalid(string) || scaler <= 1) {
         return;
     }
 
@@ -419,7 +427,7 @@ void stringScale(String* string, const int scaler) {
 //
 
 int stringCompare(const String* a, const String* b) {
-    if(stringIsNull(a) || stringIsNull(b)) {
+    if(stringIsInvalid(a) || stringIsInvalid(b)) {
         return 0;
     }
 
@@ -435,7 +443,7 @@ int stringCompare(const String* a, const String* b) {
 
 int stringEquals(const String* a, const String* b) {
     // If the strings are null or of different lengths, they are not equal.
-    if(stringIsNull(a) || stringIsNull(b) || a->length != b->length) {
+    if(stringIsInvalid(a) || stringIsInvalid(b) || a->length != b->length) {
         return 0;
     }
 
@@ -452,7 +460,7 @@ int stringEquals(const String* a, const String* b) {
 }
 
 size_t stringIndexOf(const String* string, const String* other, const size_t startIndex) {
-    if(stringIsNull(string) || stringIsNull(other)) {
+    if(stringIsInvalid(string) || stringIsInvalid(other)) {
         return STRING_NOT_FOUND;
     }
 
@@ -473,7 +481,7 @@ size_t stringIndexOf(const String* string, const String* other, const size_t sta
 }
 
 size_t stringLastIndexOf(const String* string, const String* other, const size_t startIndex) {
-    if(stringIsNull(string) || stringIsNull(other)) {
+    if(stringIsInvalid(string) || stringIsInvalid(other)) {
         return STRING_NOT_FOUND;
     }
 
@@ -498,7 +506,7 @@ size_t stringLastIndexOf(const String* string, const String* other, const size_t
 }
 
 int stringStartsWith(const String* string, const String* prefix) {
-    if(stringIsNull(string) || stringIsNull(prefix)) {
+    if(stringIsInvalid(string) || stringIsInvalid(prefix)) {
         return 0;
     }
 
@@ -519,7 +527,7 @@ int stringStartsWith(const String* string, const String* prefix) {
 }
 
 int stringEndsWith(const String* string, const String* suffix) {
-    if(stringIsNull(string) || stringIsNull(suffix)) {
+    if(stringIsInvalid(string) || stringIsInvalid(suffix)) {
         return 0;
     }
     
@@ -540,7 +548,7 @@ int stringEndsWith(const String* string, const String* suffix) {
 int stringContains(const String* string, const String* other) {
     // Null checks are required because stringIndexOf 
     // returns STR_NOT_FOUND if either string is null
-    if(stringIsNull(string) || stringIsNull(other)) {
+    if(stringIsInvalid(string) || stringIsInvalid(other)) {
         return 0;
     }
 
@@ -552,7 +560,7 @@ int stringContains(const String* string, const String* other) {
 //
 
 void stringStrip(String* string) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -561,7 +569,7 @@ void stringStrip(String* string) {
 }
 
 void stringTrimLeft(String* string) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -590,7 +598,7 @@ void stringTrimLeft(String* string) {
 }
 
 void stringTrimRight(String* string) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -620,7 +628,7 @@ void stringTrimRight(String* string) {
 }
 
 void stringToUpper(String* string) {
-    if(stringIsNull(string) || string->length == 0) {
+    if(stringIsInvalid(string) || string->length == 0) {
         return;
     }
 
@@ -630,7 +638,7 @@ void stringToUpper(String* string) {
 }
 
 void stringToLower(String* string) {
-    if(stringIsNull(string) || string->length == 0) {
+    if(stringIsInvalid(string) || string->length == 0) {
         return;
     }
 
@@ -657,7 +665,7 @@ void stringReverse(String* string) {
 //
 
 String stringSubstring(const String* string, const size_t start, const size_t end) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return STRING_NULL;
     }
 
@@ -675,7 +683,7 @@ String stringSubstring(const String* string, const size_t start, const size_t en
 }
 
 StringArray stringSplit(const String* string, const String* delimiter) {
-    if(stringIsNull(string) || stringIsNull(delimiter)) {
+    if(stringIsInvalid(string) || stringIsInvalid(delimiter)) {
         return STRING_ARRAY_NULL;
     }
 
@@ -788,7 +796,7 @@ String stringJoinArray(const String* seperator, const StringArray* array) {
 //
 
 void stringSetCStr(String* string, const char* value) {
-    if(stringIsNull(string)) {
+    if(stringIsInvalid(string)) {
         return;
     }
 
@@ -801,7 +809,7 @@ void stringSetCStr(String* string, const char* value) {
 }
 
 void stringAppendCStr(String* dest, const char* value) {
-    if(stringIsNull(dest) || value == NULL) {
+    if(stringIsInvalid(dest) || value == NULL) {
         return;
     }
 

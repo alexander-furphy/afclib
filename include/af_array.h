@@ -55,19 +55,12 @@ typedef void (*ArrayFunc)(Array*);
 /// Represents a null/invalid array.
 #define ARRAY_NULL ((Array){0})
 
-/// Check to see if an array is invalid.
-static inline bool arrayIsInvalid(const Array array) {
-    return array.data == NULL;
-}
-
-/// Check to see if an array reference is null, or the array within it is invalid.
-static inline bool arrayIsNull(const Array* array) {
-    return array == NULL || arrayIsInvalid(*array);
-}
-
 //
 // ---------------- Functions ----------------
 //
+
+/// Check to see if an array reference is null, or the array within it is invalid.
+bool arrayIsInvalid(const Array* array);
 
 /// Allocates a new array big enough to store capacity
 /// elements of size elementSize. All data is initialised to zero.
