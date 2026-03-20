@@ -3,15 +3,19 @@
 #include <stdio.h>
 
 void listTestLifetime(void) {
-    List list = listCreate(sizeof(char));
+    List list = listCreate(sizeof(char), NULL);
     assert(!listIsInvalid(&list));
 
     listFree(&list);
     assert(listIsInvalid(&list));
 }
 
+bool intComparator(void* a, void* b) {
+    return (*(int*)a) == (*(int*)b);
+}
+
 void listTestModification(void) {
-    List intList = listCreate(sizeof(int));
+    List intList = listCreate(sizeof(int), intComparator);
 
     int item = 5;
     listAdd(&intList, &item);
@@ -29,17 +33,40 @@ void listTestModification(void) {
 
     int toRemove = 30;
     assert(listRemove(&intList, &toRemove));
+    assert(intList.count == 3);
     assert(listContains(&intList, &toRemove));
 
     listFree(&intList);
 }
 
 void listTestIterator(void) {
+    List intList = listCreate(sizeof(int), intComparator);
+    for(int i = 0; i < 32; i++) {
+        listAdd(&intList, &i);
+    }
+    assert(intList.count == 32);
 
+    for(size_t i = 0; i < intList.count; i++) {
+        int value;
+        listGet(&intList, i, &value);
+        assert(value == i);
+    }
+
+    listFree(&intList);
 }
 
 void listTestCopy(void) {
+    List intList = listCreate(sizeof(int), intComparator);
+    for(int i = 0; i < 32; i++) {
+        listAdd(&intList, &i);
+    }
 
+    List intListCopy = listCopy(&intList);
+    for(size_t i = 0; i < intListCopy.count; i++) {
+        int value;
+        listGet(&intListCopy, i, &value);
+        assert(value == i);
+    }
 }
 
 int main(void) {
@@ -48,7 +75,7 @@ int main(void) {
     listTestLifetime();
     listTestModification();
     listTestIterator();
-    listTestIterator();
+    listTestCopy();
 
     return 0;
 }

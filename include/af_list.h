@@ -1,3 +1,11 @@
+/*
+
+Written by Alexander Furphy.
+
+20 March 2026.
+
+*/
+
 #ifndef AF_LIST_H
 #define AF_LIST_H
 
@@ -13,14 +21,15 @@
 // ---------------- Data ----------------
 //
 
+/// Function for comparing two blocks of memory.
+typedef bool (*CompareFunc)(void*, void*);
+
 /// Represents the List data structure.
 typedef struct List {
     Array array;
     size_t count;
+    CompareFunc compare;
 } List;
-
-/// Stores the needed data for iterating over a list.
-typedef size_t ListIterator;
 
 //
 // ---------------- Macros and Inline Functions ----------------
@@ -37,7 +46,7 @@ typedef size_t ListIterator;
 bool listIsInvalid(const List* list);
 
 /// Create a list with a specified element size.
-List listCreate(size_t elementSize);
+List listCreate(size_t elementSize, CompareFunc compare);
 
 /// Create a copy of the list.
 List listCopy(List* src);
@@ -58,10 +67,7 @@ bool listRemove(List* list, void* data);
 /// Check to see if a list contains an element.
 bool listContains(List* list, void* data);
 
-/// Check to see if a list iterator is at the end of the list.
-bool listAtEnd(List* list, ListIterator iterator);
-
-/// Get the current item of a list from a list iterator.
-void listGet(List* list, ListIterator iterator, void* dest);
+/// Get the current item of a list at a specified index.
+void listGet(List* list, size_t i, void* dest);
 
 #endif // AF_LIST_H

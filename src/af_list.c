@@ -9,10 +9,10 @@
 bool listIsInvalid(const List* list) {
     return list == NULL || 
            arrayIsInvalid(&list->array) || 
-           list->count >= list->array.capacity;
+           list->count > list->array.capacity;
 }
 
-List listCreate(size_t elementSize) {
+List listCreate(size_t elementSize, CompareFunc compare) {
     if(elementSize == 0) {
         return LIST_NULL;
     }
@@ -22,7 +22,7 @@ List listCreate(size_t elementSize) {
         return LIST_NULL;
     }
 
-    return (List){array, 0};
+    return (List){array, 0, compare};
 }
 
 List listCopy(List* src) {
@@ -35,7 +35,7 @@ List listCopy(List* src) {
         return LIST_NULL;
     }
 
-    return (List){copy, src->count};
+    return (List){copy, src->count, src->compare};
 }
 
 void listFree(List* list) {
@@ -71,19 +71,13 @@ bool listRemove(List* list, void* data) {
         return false;
     }
 
-    // Temporary memory for checking equality
-    void* temp = malloc(list->array.elementSize);
-    if(temp == NULL) {
-        return false;
-    }
-
     // Loop through each element and compare it for being the same
     for(size_t i = 0; i < list->count; i++) {
-        arrayGet(&list->array, i, &temp);
-        if(memcmp(temp, data, list->array.elementSize) == 0) {
-            free(temp);
+        void* arrayData = arrayGetIndexPtr(&list->array, i);
 
+        if(list->compare(arrayData, data)) {
             if(i == list->array.capacity - 1) {
+                list->count--;
                 return true;
             }
             
@@ -95,7 +89,6 @@ bool listRemove(List* list, void* data) {
         }
     }
 
-    free(temp);
     return false;
 }
 
@@ -104,37 +97,21 @@ bool listContains(List* list, void* data) {
         return false;
     }
 
-    // Temporary memory for checking equality
-    void* temp = malloc(list->array.elementSize);
-    if(temp == NULL) {
-        return false;
-    }
-
     // Loop through each element and compare it for being the same
     for(size_t i = 0; i < list->count; i++) {
-        arrayGet(&list->array, i, &temp);
-        if(memcmp(temp, data, list->array.elementSize) == 0) {
-            free(temp);
+        void* arrayData = arrayGetIndexPtr(&list->array, i);
+        if(list->compare(arrayData, data)) {
             return true;
         }
     }
 
-    free(temp);
     return false;
 }
 
-bool listAtEnd(List* list, ListIterator iterator) {
-    if(listIsInvalid(list) || list->count == 0) {
-        return true;
-    }
-
-    return iterator >= list->count - 1ULL;
-}
-
-void listGet(List* list, ListIterator iterator, void* dest) {
-    if(listIsInvalid(list) || iterator >= list->count || dest == NULL) {
+void listGet(List* list, size_t i, void* dest) {
+    if(listIsInvalid(list) || i >= list->count || dest == NULL) {
         return;
     }
 
-    arrayGet(&list->array, iterator, dest);
+    arrayGet(&list->array, i, dest);
 }
