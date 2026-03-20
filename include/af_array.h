@@ -74,6 +74,9 @@ Array arrayCopyRange(Array* other, size_t indexA, size_t indexB);
 /// Copy an individual element of one array into a slot of another array.
 void arrayCopyElement(const Array* source, Array* dest, size_t from, size_t to);
 
+/// Copy a range of memory in the array to a raw memory address.
+void arrayMoveRange(const Array* source, void* dest, size_t index, size_t count);
+
 /// Reallocate the array if it is below new capacity.
 /// Array will stay the same and return false if this operation fails.
 bool arrayReserve(Array* array, size_t newCapacity);
@@ -86,6 +89,9 @@ void arrayClear(Array* array);
 
 /// Copy an individual element of the array into a destination (bounds checked).
 void arrayGet(const Array* array, size_t index, void* dest);
+
+/// Return a pointer that points to the location of an index of the array.
+void* arrayGetIndexPtr(const Array* array, size_t index);
 
 /// Copy source data into an index of the array (bounds checked).
 void arraySet(Array* array, size_t index, void* src);

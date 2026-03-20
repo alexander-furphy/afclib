@@ -184,6 +184,32 @@ void arrayTestCopyRange(void) {
     arrayFree(&copy);
 }
 
+void arrayTestMove(void) {
+    Array array = arrayCreate(sizeof(char), 5);
+    for(char i = 0; i < 5; i++) {
+        arraySet(&array, i, &i);
+    }
+
+    void* index1 = arrayGetIndexPtr(&array, 1);
+    assert(index1 == ((char*)array.data + 1));
+
+    arrayMoveRange(&array, index1, 3, 2);
+    
+    char c;
+    arrayGet(&array, 0, &c);
+    assert(c == 0);
+    arrayGet(&array, 1, &c);
+    assert(c == 3);
+    arrayGet(&array, 2, &c);
+    assert(c == 4);
+    arrayGet(&array, 3, &c);
+    assert(c == 3);
+    arrayGet(&array, 4, &c);
+    assert(c == 4);
+
+    arrayFree(&array);
+}
+
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 

@@ -80,6 +80,19 @@ void arrayCopyElement(const Array* source, Array* dest, size_t from, size_t to) 
     memcpy(ARRAY_INDEX(dest, to), ARRAY_INDEX(source, from), source->elementSize);
 }
 
+void arrayMoveRange(const Array* source, void* dest, size_t index, size_t count) {
+    if(arrayIsInvalid(source) || dest == NULL) {
+        return;
+    }
+
+    // Invalid indices checks
+    if(index >= source->capacity || index + count >= source->capacity || count == 0) {
+        return;
+    }
+
+    memmove(dest, ARRAY_INDEX(source, index), count);
+}
+
 bool arrayReserve(Array* array, size_t newCapacity) {
     if(arrayIsInvalid(array) || newCapacity <= array->capacity) {
         return false;
@@ -131,6 +144,14 @@ void arrayGet(const Array* array, size_t index, void* dest) {
 
     // Copy the data into the destination
     memcpy(dest, ARRAY_INDEX(array, index), array->elementSize);
+}
+
+void* arrayGetIndexPtr(const Array* array, size_t index) {
+    if(arrayIsInvalid(array) || index >= array->capacity) {
+        return NULL;
+    }
+
+    return ARRAY_INDEX(array, index);
 }
 
 void arraySet(Array* array, size_t index, void* src) {

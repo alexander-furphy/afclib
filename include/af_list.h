@@ -58,14 +58,8 @@ bool listRemove(List* list, void* data);
 /// Check to see if a list contains an element.
 bool listContains(List* list, void* data);
 
-/// Create a list iterator pointing to the start of the list.
-ListIterator listBegin(List* list);
-
 /// Check to see if a list iterator is at the end of the list.
 bool listAtEnd(List* list, ListIterator iterator);
-
-/// Advance the list iterator.
-ListIterator listAdvance(List* list, ListIterator iterator);
 
 /// Get the current item of a list from a list iterator.
 void listGet(List* list, ListIterator iterator, void* dest);
