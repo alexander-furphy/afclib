@@ -67,6 +67,9 @@ void listTestCopy(void) {
         listGet(&intListCopy, i, &value);
         assert(value == i);
     }
+
+    listFree(&intList);
+    listFree(&intListCopy);
 }
 
 int main(void) {
