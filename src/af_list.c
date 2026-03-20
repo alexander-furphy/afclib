@@ -1,6 +1,7 @@
 #include "af_list.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define LIST_INITIAL_SIZE 4
 #define LIST_RESIZE_FACTOR 2
@@ -61,10 +62,12 @@ void listAdd(List* list, void* data) {
             return;
         }
     }
+
+    arraySet(&list->array, list->count++, data);
 }
 
 bool listRemove(List* list, void* data) {
-    if(listIsInvalid(list) || data == NULL) {
+    if(listIsInvalid(list) || data == NULL || list->count == 0) {
         return false;
     }
 
@@ -86,6 +89,7 @@ bool listRemove(List* list, void* data) {
             
             void* dest = arrayGetIndexPtr(&list->array, i);
             arrayMoveRange(&list->array, dest, i + 1, list->count - i);
+            list->count--;
 
             return true;
         }
