@@ -37,7 +37,7 @@ typedef void (*QueueFunc)(Queue*);
 // ---------------- Macros and Inline Functions ----------------
 //
 
-/// Represents a null/invalid Queue
+/// Represents a null/invalid Queue.
 #define QUEUE_NULL ((Queue){0})
 
 //
