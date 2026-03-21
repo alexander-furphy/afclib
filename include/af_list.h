@@ -16,13 +16,11 @@ Written by Alexander Furphy.
 #include <stdbool.h>
 #include <stddef.h>
 #include "af_array.h"
+#include "af_collections.h"
 
 //
 // ---------------- Data ----------------
 //
-
-/// Function for comparing two blocks of memory.
-typedef bool (*CompareFunc)(void*, void*);
 
 /// Represents the List data structure.
 typedef struct List {

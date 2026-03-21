@@ -1,8 +1,5 @@
 #include "af_queue.h"
 
-#define QUEUE_INITIAL_SIZE 4
-#define QUEUE_RESIZE_FACTOR 2
-
 bool queueIsInvalid(const Queue* queue) {
     return queue == NULL ||
            arrayIsInvalid(&queue->array) || 
@@ -15,7 +12,7 @@ Queue queueCreate(size_t elementSize) {
         return QUEUE_NULL;
     }
 
-    Array array = arrayCreate(elementSize, QUEUE_INITIAL_SIZE);
+    Array array = arrayCreate(elementSize, COLLECTION_INITIAL_SIZE);
     if(arrayIsInvalid(&array)) {
         return QUEUE_NULL;
     }
@@ -30,7 +27,7 @@ static Array queueCopyToArray(Queue* queue) {
 
     Array copy = arrayCreate(
         queue->array.elementSize, 
-        queue->array.capacity * QUEUE_RESIZE_FACTOR
+        queue->array.capacity * COLLECTION_RESIZE_FACTOR
     );
 
     if(arrayIsInvalid(&copy)) {

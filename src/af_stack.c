@@ -1,8 +1,5 @@
 #include "af_stack.h"
 
-#define STACK_INITIAL_SIZE 4
-#define STACK_GROWTH_FACTOR 2
-
 bool stackIsInvalid(const Stack* stack) {
     return stack == NULL ||
            stack->count > stack->array.capacity ||
@@ -22,7 +19,7 @@ Stack stackCreate(size_t elementSize) {
         return STACK_NULL;
     }
 
-    Array array = arrayCreate(elementSize, STACK_INITIAL_SIZE);
+    Array array = arrayCreate(elementSize, COLLECTION_INITIAL_SIZE);
     if(arrayIsInvalid(&array)) {
         return STACK_NULL;
     }
@@ -72,7 +69,7 @@ static bool stackResize(Stack* stack) {
     }
 
     // Array reserve returns false on failure
-    return arrayReserve(&stack->array, stack->array.capacity * STACK_GROWTH_FACTOR);
+    return arrayReserve(&stack->array, stack->array.capacity * COLLECTION_RESIZE_FACTOR);
 }
 
 void stackPush(Stack* stack, void* src) {

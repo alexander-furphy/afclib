@@ -15,6 +15,7 @@ Written by Alexander Furphy.
 
 #include <stdbool.h>
 #include <stddef.h>
+#include "af_collections.h"
 #include "af_array.h"
 
 //

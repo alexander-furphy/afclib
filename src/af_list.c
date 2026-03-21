@@ -3,9 +3,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#define LIST_INITIAL_SIZE 4
-#define LIST_RESIZE_FACTOR 2
-
 bool listIsInvalid(const List* list) {
     return list == NULL || 
            arrayIsInvalid(&list->array) || 
@@ -17,7 +14,7 @@ List listCreate(size_t elementSize, CompareFunc compare) {
         return LIST_NULL;
     }
 
-    Array array = arrayCreate(elementSize, LIST_INITIAL_SIZE);
+    Array array = arrayCreate(elementSize, COLLECTION_INITIAL_SIZE);
     if(arrayIsInvalid(&array)) {
         return LIST_NULL;
     }
@@ -57,7 +54,7 @@ void listAdd(List* list, void* data) {
     }
 
     if(list->count >= list->array.capacity) {
-        bool success = arrayReserve(&list->array, list->array.capacity * LIST_RESIZE_FACTOR);
+        bool success = arrayReserve(&list->array, list->array.capacity * COLLECTION_RESIZE_FACTOR);
         if(!success) {
             return;
         }
