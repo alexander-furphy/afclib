@@ -16,14 +16,14 @@ void stackTestLifecycle(void) {
 
 void stackTestBasic(void) {
     Stack shortStack = stackCreate(sizeof(short));
-    assert(stackIsEmpty(shortStack));
+    assert(stackIsEmpty(&shortStack));
     
     // Values
     short value1 = 10;
     short value2 = 15;
     stackPush(&shortStack, &value1);
     stackPush(&shortStack, &value2);
-    assert(stackCount(shortStack) == 2);
+    assert(stackCount(&shortStack) == 2);
 
     // Check the top
     short top;
@@ -34,7 +34,7 @@ void stackTestBasic(void) {
     assert(top == 10);
     stackPop(&shortStack);
     stackPop(&shortStack);
-    assert(stackCount(shortStack) == 0);
+    assert(stackCount(&shortStack) == 0);
 
     // Test resizing
     short num = 5;
@@ -42,13 +42,13 @@ void stackTestBasic(void) {
         stackPush(&shortStack, &num);
     }
     assert(!stackIsInvalid(&shortStack));
-    assert(stackCount(shortStack) == 32);
+    assert(stackCount(&shortStack) == 32);
 
     stackFree(&shortStack);
 }
 
 void intStackDestructor(Stack* stack) {
-    while(!stackIsEmpty(*stack)) {
+    while(!stackIsEmpty(stack)) {
         int* top;
         stackPeek(stack, &top);
         if(top != NULL) {
@@ -86,7 +86,7 @@ void stackTestCopy(void) {
 
     Stack copy = stackCopy(&stack);
     assert(!stackIsInvalid(&copy));
-    assert(stackCount(copy) == 10);
+    assert(stackCount(&copy) == 10);
     assert(copy.array.capacity == 10);
 
     stackFree(&stack);
