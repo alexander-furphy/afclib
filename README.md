@@ -99,7 +99,7 @@ void collectionsExample(void) {
     stackPush(&intStack, &a);
     stackPush(&intStack, &b);
     stackPush(&intStack, &c);
-    while(!stackIsEmpty(intStack)) {
+    while(!stackIsEmpty(&intStack)) {
         int retrieved = 0;
         stackPeek(&intStack, &retrieved);
         stackPop(&intStack);
