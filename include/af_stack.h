@@ -46,10 +46,10 @@ typedef void (*StackFunc)(Stack* stack);
 bool stackIsInvalid(const Stack* stack);
 
 /// Tests if a stack is empty.
-bool stackIsEmpty(const Stack stack);
+bool stackIsEmpty(const Stack* stack);
 
 /// Get the size of a stack.
-size_t stackCount(const Stack stack);
+size_t stackCount(const Stack* stack);
 
 /// Create a stack with a specified element size.
 Stack stackCreate(size_t elementSize);

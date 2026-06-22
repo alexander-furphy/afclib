@@ -6,12 +6,12 @@ bool stackIsInvalid(const Stack* stack) {
            arrayIsInvalid(&stack->array);
 }
 
-bool stackIsEmpty(const Stack stack) {
-    return stack.count == 0;
+bool stackIsEmpty(const Stack* stack) {
+    return stack->count == 0;
 }
 
-size_t stackCount(const Stack stack) {
-    return stack.count;
+size_t stackCount(const Stack* stack) {
+    return stack->count;
 }
 
 Stack stackCreate(size_t elementSize) {
